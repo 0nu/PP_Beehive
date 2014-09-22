@@ -3,7 +3,7 @@ package hive;
 import java.lang.management.ManagementFactory;
 /**
  * This class only shows some information about a hive. Needed?
- * @author ole
+ * @author olenhjx x
  *
  */
 public class ShowFood implements Runnable {
