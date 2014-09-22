@@ -34,7 +34,7 @@ public class GoSearching implements Runnable {
 		// main function for bee behaviour
 		//
 
-		switcher();
+		switcher(); 
 
 	}
 
