@@ -8,7 +8,7 @@ import javax.swing.SwingUtilities;
  * 
  * @author ole
  * rgfscacsdfecd
- * yyy
+ * yyyxxy
  */
 public class startup {
 
