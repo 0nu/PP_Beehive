@@ -85,7 +85,7 @@ public class MyGui extends JPanel {
 		add(treeScrollpane);
 
 		// this is the beehive table
-		String[] BeehiveColName1 = { "Namea", "Size", "X", "Y", "Waiting Bees" };
+		String[] BeehiveColName1 = { "Nameaa", "Size", "X", "Y", "Waiting Bees" };
 		JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
 		SetUpTableData setUpTableDataBeehive = new SetUpTableData(beehiveTable,
 				world, "Beehives");
