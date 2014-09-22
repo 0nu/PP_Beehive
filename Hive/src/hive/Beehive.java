@@ -59,8 +59,9 @@ public class Beehive implements Runnable {
 		// own thread.
 		for (int i = 0; i < numOfBees; i++) {
 			this.bees.add(new Bee(this.world, this));
+			Thread t = new Thread(this.bees.getLast(), "Bee " + i);
 			// Thread t = new Thread(bees.get(i), "Bee " + i);
-			Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
+			//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
 			t.start();
 
 		}

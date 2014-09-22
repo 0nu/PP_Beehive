@@ -36,6 +36,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	double sourceQual;
 	String sourceType;
 	double sourceSize;
+	private Beehive beehive;
 
 	/**
 	 * Constructor method. Add to waiting queue, as bee is born in beehive and
@@ -58,29 +59,327 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		this.status = "waiting";
 		this.world = world;
 		this.rand = new Random();
+		this.beehive = ownHive;
 	}
 
 	/**
-	 * Run method. Nothing here at the moment.
+	 * Run method, go to switcher
 	 */
+	@Override
 	public void run() {
-		// this is the class for the bees
-		// which information do we need?
-		// belongs to which beehive? -> postion beehive
-		// age
-		// actual position
-		// actual action
-		// knowledge
-		// food
-		// ...?
-		// System.out.println("Biene wird erzeugt");
+		// main function for bee behaviour
+		//
 
-		// the bee is born
-		// ... it is in the beehive
-		// ... status -> wating for information
+		switcher(); 
 
 	}
 
+	/**
+	 * When status of bee is changed, we should always get back here. Depending
+	 * on the status field of the bee, the next method to be run is chosen.
+	 */
+	private void switcher() {
+		// this method is called every time the status changes.
+
+		while (true) {
+			switch (this.getStatus()) {
+			case "arrived":
+				arrived();
+				break;
+			case "waiting":
+				this.ownHive.waitingQueueAdd(this);
+				eat();
+				break;
+			case "searching":
+				// let her fly to a random start point
+				//this.removeFromQueue(this.beehive, actualBee);
+				flight(
+						this.rand.nextInt(this.beehive.world.width),
+						this.rand.nextInt(this.beehive.world.height),
+						"searching");
+				if (this.getStatus() == "searching") {
+					search();
+				}
+				break;
+			case "starting":
+				starting();
+				break;
+			case "empty":
+				search();
+				break;
+			case "foundSth":
+				foundSth();
+				break;
+			case "full":
+				goBackHome();
+				break;
+			case "arrivedathome":
+				this.actualX = this.homeX;
+				this.actualY = this.homeY;
+				this.atHome = true;
+				this.giveStuff(this.beehive, this);
+				if (this.getStatus() == "waiting") {
+					break; 
+				} else {
+
+					this.setStatus("startDancing");
+					break;
+				}
+				
+			case "startDancing":
+				dance();
+				break;
+
+			}
+		}
+	}
+
+	/**
+	 * Bee has knowledge and arrived at source -> Get food
+	 */
+	private void arrived() {
+
+		this.getStuff(this.source, this);
+
+	}
+
+	/**
+	 * Search for sources.
+	 */
+	private void search() {
+		// TODO: better searching, only 3kms away from beehive
+		this.atHome = false;
+		setStatus("searching");
+
+
+		do {
+			int xNext = this.actualX
+					- this.rand.nextInt(11) + 5;
+			int yNext = this.actualY
+					- this.rand.nextInt(11) + 5;
+
+			if (xNext > 0 && xNext < this.beehive.world.width) {
+				this.actualX = xNext;
+			}
+
+			if (yNext > 0 && yNext < this.beehive.world.height) {
+				this.actualY = yNext;
+			}
+			/*
+			 * this.actualX = this.actualX +
+			 * this.rand.nextInt(10) - 5; this.actualY =
+			 * this.actualY + this.rand.nextInt(10) - 5;
+			 */
+			try {
+				Thread.currentThread();
+				Thread.sleep(500); // 1000 milliseconds is one
+				// second.
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			foundSth();
+
+		} while (this.getStatus().equals("searching"));
+	}
+
+	/*
+	 * Eat something from time to time. This should only happen if the bee is at
+	 * home.
+	 */
+	private void eat() {
+		// when a bee is born, she stays at home and eats
+		do {
+
+			try {
+				Thread.sleep(900); // 1000 milliseconds is one second.
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+
+			this.eat(this.beehive);
+
+			// ... until status is changed
+		} while (this.getStatus().equals("waiting"));
+
+		// what do next? depending on the status.
+
+	}
+
+	/**
+	 * Did the bee hit a source?
+	 */
+	private void foundSth() {
+		// TODO: badly coded
+
+
+		Source foundSource = this.world.hitSource(this.actualX,this.actualY);
+		if (foundSource != null) {
+			this.actualX = foundSource.x;
+			this.actualY = foundSource.y;
+			this.getStuff(foundSource, this);
+		}
+
+	}
+
+	/**
+	 * Grab food from source and go back home
+	 */
+	private void goBackHome() {
+		this.setStatus("BackHome");
+		flight(this.homeX, this.homeY, "home");
+	}
+
+	/**
+	 * Flying to a destination
+	 * 
+	 * @param destX
+	 *            destination x-point
+	 * @param destY
+	 *            destination y-point
+	 * @param destination
+	 *            destination type {"home", "getFood",...}
+	 * @return bee object, probably not needed (?)
+	 */
+	private void flight(int destX, int destY, String destination) {
+		// TODO: code a better method for shorter flights, return bee - why?
+		double diffX = destX - this.actualX;
+		double diffY = destY - this.actualY;
+
+		// we need the shortest way between Bee and destination
+		double length = Math.sqrt(diffX * diffX + diffY * diffY);
+
+		// and now divide that up by the way a bee flights during 1 timeperiod
+		int steps = (int) (length / 20);
+		if (steps == 0) {
+			steps = 1;
+		}
+		// and now divide the two differences by step count
+		diffX = (int) diffX / steps;
+		diffY = (int) diffY / steps;
+		int i;
+
+		for (i = 1; i < steps; i++) {
+			this.actualX = (int) (this.actualX + diffX);
+			this.actualY = (int) (this.actualY + diffY);
+			try {
+				Thread.currentThread();
+				Thread.sleep(1000); // 1000 milliseconds is one
+				// second.
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			if (destination == "search") {
+				foundSth();
+				if (this.getStatus().equals("full")) {
+					break;
+				}
+			}
+		}
+
+		// TODO: smarter way of computing pathway, problem is the int vs double
+		// thing
+		this.actualX = destX;
+		this.actualY = destY;
+
+
+		// there are several possibilities what to do next, depending on the
+		// _destination_ string submitted:
+		switch (destination) {
+		case "searching":
+			break;
+
+		case "getFood":
+			this.setStatus("arrived");
+			break;
+
+		case "home":
+			this.setStatus("arrivedathome");
+			break;
+
+		}
+
+
+	}
+
+	/**
+	 * bien is at home and gives other bees information about trach better
+	 * quality -> longer dance bigger size of tracht -> longer dance less food
+	 * in beehive -> longer dance (not implemented) far away -> shorter dance
+	 */
+	private void dance() {
+		int count = 6;
+		// compute the distance between beehive and tracht
+		int diffX = this.sourceX - this.homeX;
+		int diffY = this.sourceY - this.homeY;
+		double distance = (int) Math.sqrt(diffX * diffX + diffY * diffY);
+
+		// better quality -> higher value
+		// max(size) = 10.000
+		// max(quality) = 100
+		// max(distance) = depending on size of world AND/OR bee.max(flight)
+		// TODO: create constants for source quality etc
+
+		// this shouldn't get bigger than 100, so we could use that as
+		// probability
+		double overallQuality = this.sourceQual / 100
+				+ this.sourceSize / 10000 - distance / 6000;
+		// take the first 6 bees of the queue
+		// dance.queue.size() may be smaller than 6
+		ArrayList<Bee> danceQueue = this.removeFromQueue(beehive,
+				count);
+
+		ArrayList<Bee> removeQueue = new ArrayList<Bee>();
+		for (int k = 1; k < 100 * overallQuality; k++) {
+
+			for (Bee b : danceQueue) {
+				if (rand.nextInt(100) > 96) {
+					b.sourceQual = this.sourceQual;
+					b.sourceSize = this.sourceSize;
+					b.sourceType = this.sourceType;
+					b.sourceX = this.sourceX;
+					b.sourceY = this.sourceY;
+					b.source = this.source;
+					b.setStatus("starting");
+
+					// I can't change danceQUeue at this moment because i iter
+					// through it
+					removeQueue.add(b);
+				}
+
+			}
+
+			// now we can remove the bees that are already on their way to the
+			// source from the danceQueue
+			for (Bee b : removeQueue) {
+				danceQueue.remove(b);
+
+				// if there's no Bee in the waitingqueue, we will get a new
+				// ArrayList<Bee> with .size() == 0.
+				ArrayList<Bee> nextBee = removeFromQueue(b.ownHive, 1);
+				if (nextBee.size() > 0) {
+					danceQueue.add(nextBee.get(0));
+				}
+			}
+
+			removeQueue.clear();
+
+		}
+		for (Bee b : danceQueue) {
+			this.beehive.waitingQueueAdd(b);
+		}
+		this.setStatus("starting");
+
+	}
+
+	/**
+	 * Bee is at home, but has information about source and wants to get the
+	 * food.
+	 */
+	private void starting() {
+		this.atHome = false;
+		flight(this.sourceX, this.sourceY, "getFood");
+
+	}
 	@Override
 	public void getStuff(Source source, Bee bee) {
 		// grab all the information and some food/water from source

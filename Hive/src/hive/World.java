@@ -49,7 +49,7 @@ public class World implements Runnable {
 			int numOfTrees, double hungry) {
 		this.width = width;
 		this.height = height;
-		this.Beehives = new LinkedList();
+		this.Beehives = new LinkedList<Beehive>();
 		this.numOfBeehives = numOfBeehives;
 		this.numOfSources = numOfSources;
 		this.numOfTrees = numOfTrees;
