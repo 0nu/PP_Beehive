@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /**
  * The bee - lots of information is stored here. Each bee object is meant to be
  * run as single thread, as there are lots of actions, interactions, decisions
- * and death (not implemented yet).dcvd
+ * and death (not implemented yet).dcvdhhb
  * 
  * @author ole
  * 
