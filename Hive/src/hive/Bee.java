@@ -4,6 +4,9 @@ import java.util.Random;
 //import java.util.LinkedList;
 import java.util.ArrayList;
 
+import sources.Source;
+import sources.SourceInterface;
+
 /**
  * The bee - lots of information is stored here. Each bee object is meant to be
  * run as single thread, as there are lots of actions, interactions, decisions
@@ -17,8 +20,8 @@ import java.util.ArrayList;
 public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	int homeX;
 	int homeY;
-	int actualX;
-	int actualY;
+	private int actualX;
+	private int actualY;
 	boolean hasKnowledge;
 	int knowledge;
 	int food;
@@ -48,10 +51,10 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	 *            beehive object of the bee.
 	 */
 	Bee(World world, Beehive ownHive) {
-		this.homeX = ownHive.positionX;
-		this.homeY = ownHive.positionY;
-		this.actualX = ownHive.positionX;
-		this.actualY = ownHive.positionY;
+		this.homeX = ownHive.getPositionX();
+		this.homeY = ownHive.getPositionY();
+		this.actualX = ownHive.getPositionX();
+		this.actualY = ownHive.getPositionY();
 		this.atHome = true;
 		this.hasKnowledge = false;
 		this.age = 100;
@@ -94,8 +97,8 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 				// let her fly to a random start point
 				//this.removeFromQueue(this.beehive, actualBee);
 				flight(
-						this.rand.nextInt(this.beehive.world.width),
-						this.rand.nextInt(this.beehive.world.height),
+						this.rand.nextInt(this.beehive.world.getWidth()),
+						this.rand.nextInt(this.beehive.world.getHeight()),
 						"searching");
 				if (this.getStatus() == "searching") {
 					search();
@@ -158,11 +161,11 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 			int yNext = this.actualY
 					- this.rand.nextInt(11) + 5;
 
-			if (xNext > 0 && xNext < this.beehive.world.width) {
+			if (xNext > 0 && xNext < this.beehive.world.getWidth()) {
 				this.actualX = xNext;
 			}
 
-			if (yNext > 0 && yNext < this.beehive.world.height) {
+			if (yNext > 0 && yNext < this.beehive.world.getHeight()) {
 				this.actualY = yNext;
 			}
 			/*
@@ -416,8 +419,8 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		// +1 on food for submitted beehive, remove food from bee
 
 		synchronized (this.ownHive) {
-			if (beehive.food < beehive.getSize()) {
-			beehive.food = beehive.food + 1;
+			if (beehive.getFood() < beehive.getSize()) {
+			beehive.setFood(beehive.getFood() + 1);
 			bee.food = 0;
 			} else {
 				bee.setStatus("waiting");
@@ -507,5 +510,33 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		this.sourceX = 0;
 		this.sourceY = 0;
 
+	}
+
+	/**
+	 * @return the actualX
+	 */
+	public int getActualX() {
+		return actualX;
+	}
+
+	/**
+	 * @param actualX the actualX to set
+	 */
+	public void setActualX(int actualX) {
+		this.actualX = actualX;
+	}
+
+	/**
+	 * @return the actualY
+	 */
+	public int getActualY() {
+		return actualY;
+	}
+
+	/**
+	 * @param actualY the actualY to set
+	 */
+	public void setActualY(int actualY) {
+		this.actualY = actualY;
 	}
 }

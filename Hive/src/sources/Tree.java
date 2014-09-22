@@ -1,4 +1,6 @@
-package hive;
+package sources;
+
+import hive.World;
 
 import java.util.Random;
 
@@ -12,7 +14,7 @@ public class Tree extends Source {
 	private World world;
 
 	// constructor
-	Tree(int x, int y,World world) {
+	public Tree(int x, int y,World world) {
 		this.rand = new Random();
 		this.x = x;
 		this.y = y;

@@ -12,17 +12,16 @@ import java.util.ArrayList;
  * 
  */
 public class Beehive implements Runnable {
-	int positionX;
-	int positionY;
+	private int positionX;
+	private int positionY;
 	int numOfBees;
-	double food;
-	LinkedList<Bee> bees;
+	private double food;
+	private LinkedList<Bee> bees;
 	World world;
 	private ArrayList<Bee> waitingQueue;
 	Random rand;
 	boolean sendout;
 	private String name;
-	private double hunger;
 	int size;
 	public int IndexInBeehiveList;
 
@@ -44,7 +43,6 @@ public class Beehive implements Runnable {
 	 */
 
 	Beehive(int x, int y, int numOfBees, World world, int num, double hunger) {
-		this.hunger = hunger;
 		positionX = x;
 		positionY = y;
 		this.numOfBees = numOfBees;
@@ -244,5 +242,61 @@ public class Beehive implements Runnable {
 					this.getWaitingQueueSize(),
 					this.IndexInBeehiveList, 4);
 		}
+	}
+
+	/**
+	 * @return the bees
+	 */
+	public LinkedList<Bee> getBees() {
+		return bees;
+	}
+
+	/**
+	 * @param bees the bees to set
+	 */
+	public void setBees(LinkedList<Bee> bees) {
+		this.bees = bees;
+	}
+
+	/**
+	 * @return the positionX
+	 */
+	public int getPositionX() {
+		return positionX;
+	}
+
+	/**
+	 * @param positionX the positionX to set
+	 */
+	public void setPositionX(int positionX) {
+		this.positionX = positionX;
+	}
+
+	/**
+	 * @return the positionY
+	 */
+	public int getPositionY() {
+		return positionY;
+	}
+
+	/**
+	 * @param positionY the positionY to set
+	 */
+	public void setPositionY(int positionY) {
+		this.positionY = positionY;
+	}
+
+	/**
+	 * @return the food
+	 */
+	public double getFood() {
+		return food;
+	}
+
+	/**
+	 * @param food the food to set
+	 */
+	public void setFood(double food) {
+		this.food = food;
 	}
 }

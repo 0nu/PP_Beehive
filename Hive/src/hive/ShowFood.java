@@ -22,7 +22,7 @@ public class ShowFood implements Runnable {
 	public void run() {
 		// This is for showing the food of a beehive from time to time
 		while (true) {
-			System.out.println(Thread.currentThread().getName() + " has " + this.beehive.food
+			System.out.println(Thread.currentThread().getName() + " has " + this.beehive.getFood()
 					+ " food.");
 			System.out.println("Threads in Group: " + java.lang.Thread.activeCount());
 			System.out.println("Threads overall: "+ ManagementFactory.getThreadMXBean().getThreadCount());

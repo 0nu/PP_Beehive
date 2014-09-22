@@ -1,7 +1,8 @@
-package hive;
+package guiStuff;
+
+import hive.World;
 
 import java.awt.Color;
-import java.awt.GradientPaint;
 
 import javax.swing.JFrame;
 
@@ -9,9 +10,7 @@ import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.GrayPaintScale;
 import org.jfree.chart.renderer.LookupPaintScale;
-import org.jfree.chart.renderer.PaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.data.xy.XYZDataset;
 
@@ -26,15 +25,11 @@ public class RefreshChart implements Runnable {
 	private JFreeChart chart;
 	private World world;
 	public ChartPanel chartPanel;
-	private JFrame frame;
-
 	public RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world,
 			JFrame frame) {
 		this.chart = chart;
 		this.world = world;
 		this.chartPanel = chartPanel;
-		this.frame = frame;
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -88,7 +83,7 @@ public class RefreshChart implements Runnable {
 			
 			this.chart = createChart(new CreateXYBlockData(world).getDataset(), scale);
 			this.chart.fireChartChanged();
-			ChartPanel chartPanel = new ChartPanel(chart);
+			new ChartPanel(chart);
 			// this.chartPanel = chartPanel;
 			this.chartPanel.setChart(this.chart);
 			this.chartPanel.updateUI();
@@ -107,12 +102,12 @@ public class RefreshChart implements Runnable {
 		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		xAxis.setLowerMargin(0.0);
 		xAxis.setUpperMargin(0.0);
-		xAxis.setRange(0, world.width);
+		xAxis.setRange(0, world.getWidth());
 		NumberAxis yAxis = new NumberAxis("Y");
 		yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		yAxis.setLowerMargin(0.0);
 		yAxis.setUpperMargin(0.0);
-		yAxis.setRange(0, world.height);
+		yAxis.setRange(0, world.getHeight());
 		XYBlockRenderer renderer = new XYBlockRenderer();
 		 //LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
 		//PaintScale scale = new GrayPaintScale(-10000, 100);

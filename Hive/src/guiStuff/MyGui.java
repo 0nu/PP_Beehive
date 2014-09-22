@@ -1,33 +1,28 @@
-package hive;
+package guiStuff;
 
-import java.awt.Frame;
+import hive.World;
+
+import java.awt.Color;
 import java.awt.GridLayout;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Color;
-
-import javax.swing.JPanel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.data.DomainOrder;
-import org.jfree.data.general.DatasetChangeListener;
-import org.jfree.data.general.DatasetGroup;
-import org.jfree.data.xy.XYZDataset;
-import org.jfree.chart.renderer.GrayPaintScale;
 import org.jfree.chart.renderer.LookupPaintScale;
-import org.jfree.chart.renderer.PaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
+import org.jfree.data.xy.XYZDataset;
 /**
  * This builds the gui.
  * @author ole
@@ -38,10 +33,6 @@ public class MyGui extends JPanel {
 	World world;
 	private JTable jTableTrees;
 	private JTable jTableBeehives;
-	private JFrame frame;
-	private CreateXYBlockData blockData;
-	private JLabel sliderLabel;
-
 	/**
 	 * Constructor. At the moment it creates 3 panels: 
 	 * - Table for sources
@@ -52,7 +43,7 @@ public class MyGui extends JPanel {
 	 */
 	public MyGui(World world, JFrame frame) {
 		this.world = world;
-		this.frame = frame;
+		
 
 		/*
 		 * ÜVector<Vector<String>> rowData = new Vector<Vector<String>>(50, 5);
@@ -127,8 +118,8 @@ public class MyGui extends JPanel {
 
 		
 		// change size of beehives (only the first beehive at the moment)
-		final JLabel sliderLabelBeehiveSize = new JLabel("Max food of Beehive : " + (this.world.Beehives.getFirst().getSize()));
-		JSlider sliderBeehiveSize = new JSlider(0,5000, this.world.Beehives.getFirst().getSize());
+		final JLabel sliderLabelBeehiveSize = new JLabel("Max food of Beehive : " + (this.world.getBeehives().getFirst().getSize()));
+		JSlider sliderBeehiveSize = new JSlider(0,5000, this.world.getBeehives().getFirst().getSize());
 		sliderBeehiveSize.setPaintTicks(true);
 		sliderBeehiveSize.setMajorTickSpacing( 1000 );
 		sliderBeehiveSize.setMinorTickSpacing( 500 );
@@ -136,8 +127,8 @@ public class MyGui extends JPanel {
 		sliderBeehiveSize.addChangeListener( new ChangeListener() 
 		{
 			public void stateChanged( ChangeEvent e ) {
-				MyGui.this.world.Beehives.getFirst().setSize( ((JSlider)e.getSource()).getValue() );
-				sliderLabelBeehiveSize.setText("Max food of Beehive : " + (MyGui.this.world.Beehives.getFirst().getSize()));
+				MyGui.this.world.getBeehives().getFirst().setSize( ((JSlider)e.getSource()).getValue() );
+				sliderLabelBeehiveSize.setText("Max food of Beehive : " + (MyGui.this.world.getBeehives().getFirst().getSize()));
 			}
 		} 				)				;
 		
@@ -174,12 +165,12 @@ public class MyGui extends JPanel {
 		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		xAxis.setLowerMargin(0.0);
 		xAxis.setUpperMargin(0.0);
-		xAxis.setRange(0, world.width);
+		xAxis.setRange(0, world.getWidth());
 		NumberAxis yAxis = new NumberAxis("Y");
 		yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		yAxis.setLowerMargin(0.0);
 		yAxis.setUpperMargin(0.0);
-		yAxis.setRange(0, world.height);
+		yAxis.setRange(0, world.getHeight());
 		XYBlockRenderer renderer = new XYBlockRenderer();
 		//LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
 		//PaintScale scale = new GrayPaintScale(-10000, 100);
@@ -229,6 +220,11 @@ public class MyGui extends JPanel {
 
 		if (jTable == null) {
 			jTable = new JTable() {
+				/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
 				public boolean isCellEditable(int nRow, int nCol) {
 					return false;
 				}

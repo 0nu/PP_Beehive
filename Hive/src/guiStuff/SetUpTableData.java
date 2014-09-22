@@ -1,5 +1,7 @@
-package hive;
+package guiStuff;
 
+
+import hive.World;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
@@ -48,13 +50,13 @@ public class SetUpTableData implements Runnable {
 		}
 		case "Beehives": {
 			// TODO: Add support for multiple beehives, this code works only with one!
-			for (int t = 0; t < this.world.numOfBeehives; t++) {
+			for (int t = 0; t < this.world.getNumOfBeehives(); t++) {
 				String[] data = new String[5];
 
 				data[0] = this.world.getBeehives().get(t).getName();
-				data[1] = Double.toString(this.world.getBeehives().get(t).food);
-				data[2] = Integer.toString(this.world.getBeehives().get(t).positionX);
-				data[3] = Integer.toString(this.world.getBeehives().get(t).positionY);
+				data[1] = Double.toString(this.world.getBeehives().get(t).getFood());
+				data[2] = Integer.toString(this.world.getBeehives().get(t).getPositionX());
+				data[3] = Integer.toString(this.world.getBeehives().get(t).getPositionY());
 				data[4] = Integer.toString(this.world.getBeehives().get(t).waitingQueueSize());
 			
 				tableModel.addRow(data);

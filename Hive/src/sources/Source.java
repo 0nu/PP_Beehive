@@ -1,4 +1,7 @@
-package hive;
+package sources;
+
+import hive.World;
+
 /**
  * Parent method for the trees, rivers, whatever to come.
  * @author ole
@@ -66,8 +69,8 @@ public class Source extends Thread {
 			if (this.size >= 1) {
 				foodreturn = 1;
 				this.size--;
-				if (world.tableModelTrees != null) {
-					world.tableModelTrees.setValueAt(
+				if (world.getTableModelTrees() != null) {
+					world.getTableModelTrees().setValueAt(
 							Integer.toString(this.size),
 							ListIndex, 1);
 				}

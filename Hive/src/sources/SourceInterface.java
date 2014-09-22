@@ -1,4 +1,7 @@
-package hive;
+package sources;
+
+import hive.Bee;
+import hive.Beehive;
 
 import java.util.ArrayList;
 

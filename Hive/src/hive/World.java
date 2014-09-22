@@ -6,6 +6,9 @@ import java.util.ArrayList;
 
 import javax.swing.table.DefaultTableModel;
 
+import sources.Source;
+import sources.Tree;
+
 /**
  * 
  * Constructor-method for the world.
@@ -14,18 +17,16 @@ import javax.swing.table.DefaultTableModel;
  * 
  */
 public class World implements Runnable {
-	int width;
-	int height;
+	private int width;
+	private int height;
 	ArrayList<Integer> sourcesList;
 	public LinkedList<Tree> trees;
 	LinkedList<Beehive> Beehives;
 	DefaultTableModel tableModelBeehives;
-	DefaultTableModel tableModelTrees;
-	int numOfBeehives;
-	private int numOfSources;
-	private int numOfTrees;
+	private DefaultTableModel tableModelTrees;
+	private int numOfBeehives;
 	private int numOfThisBeehives;
-	Source[][] sourcesMap;
+	private Source[][] sourcesMap;
 	private double hunger;
 
 	/**
@@ -47,13 +48,11 @@ public class World implements Runnable {
 	// constructor
 	World(int width, int height, int numOfBeehives, int numOfSources,
 			int numOfTrees, double hungry) {
-		this.width = width;
-		this.height = height;
+		this.setWidth(width);
+		this.setHeight(height);
 		this.Beehives = new LinkedList<Beehive>();
 		this.numOfBeehives = numOfBeehives;
-		this.numOfSources = numOfSources;
-		this.numOfTrees = numOfTrees;
-		Source[][] sourcesMap = new Source[this.width][this.height];
+		Source[][] sourcesMap = new Source[this.getWidth()][this.getHeight()];
 		this.sourcesMap = sourcesMap;
 		this.hunger = hungry;
 	}
@@ -126,7 +125,7 @@ public class World implements Runnable {
 
 		// create sourcesList with the X and Y positions for the later created
 		// sources and beehives
-		this.sourcesList = getPosition(this.width, this.height, numOfSources,
+		this.sourcesList = getPosition(this.getWidth(), this.getHeight(), numOfSources,
 				this.sourcesList);
 		trees = new LinkedList<Tree>();
 
@@ -196,7 +195,7 @@ public class World implements Runnable {
 			for (int xIter = -radius; xIter <= radius; xIter++) {
 				xCheck = xIter+x;
 				yCheck = yIter+y;
-				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< this.width) && (yCheck < this.height) && (xCheck > 0) && (yCheck > 0)) {
+				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< this.getWidth()) && (yCheck < this.getHeight()) && (xCheck > 0) && (yCheck > 0)) {
 					this.sourcesMap[xCheck][yCheck] = source;     
 				}
 			}
@@ -216,5 +215,75 @@ public class World implements Runnable {
 		// TODO Auto-generated method stub
 		this.hunger = (double) value / 10000;
 		System.out.println(value + " " + this.hunger);
+	}
+
+	/**
+	 * @return the width
+	 */
+	public int getWidth() {
+		return width;
+	}
+
+	/**
+	 * @param width the width to set
+	 */
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	/**
+	 * @return the height
+	 */
+	public int getHeight() {
+		return height;
+	}
+
+	/**
+	 * @param height the height to set
+	 */
+	public void setHeight(int height) {
+		this.height = height;
+	}
+
+	/**
+	 * @return the sourcesMap
+	 */
+	public Source[][] getSourcesMap() {
+		return sourcesMap;
+	}
+
+	/**
+	 * @param sourcesMap the sourcesMap to set
+	 */
+	public void setSourcesMap(Source[][] sourcesMap) {
+		this.sourcesMap = sourcesMap;
+	}
+
+	/**
+	 * @return the numOfBeehives
+	 */
+	public int getNumOfBeehives() {
+		return numOfBeehives;
+	}
+
+	/**
+	 * @param numOfBeehives the numOfBeehives to set
+	 */
+	public void setNumOfBeehives(int numOfBeehives) {
+		this.numOfBeehives = numOfBeehives;
+	}
+
+	/**
+	 * @return the tableModelTrees
+	 */
+	public DefaultTableModel getTableModelTrees() {
+		return tableModelTrees;
+	}
+
+	/**
+	 * @param tableModelTrees the tableModelTrees to set
+	 */
+	public void setTableModelTrees(DefaultTableModel tableModelTrees) {
+		this.tableModelTrees = tableModelTrees;
 	}
 }

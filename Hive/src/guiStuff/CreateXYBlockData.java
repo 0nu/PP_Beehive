@@ -1,19 +1,14 @@
-package hive;
+package guiStuff;
 
 /**
  * This can create a dataset for the xyblockrenderer.
  */
-import java.awt.Color;
-import java.awt.Container;
+import hive.Bee;
+import hive.Beehive;
+import hive.World;
+
 import java.util.LinkedList;
 
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.GrayPaintScale;
-import org.jfree.chart.renderer.PaintScale;
-import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.data.DomainOrder;
 import org.jfree.data.general.DatasetChangeListener;
 import org.jfree.data.general.DatasetGroup;
@@ -21,9 +16,7 @@ import org.jfree.data.xy.XYZDataset;
 
 public class CreateXYBlockData implements Runnable {
 	private World world;
-	private XYZDataset dataset;
-
-
+	
 	public CreateXYBlockData(World world) {
 		this.world = world;
 	}
@@ -56,21 +49,21 @@ public class CreateXYBlockData implements Runnable {
 		// this is for the Bees
 		final LinkedList<int[]> densityDataLL = new LinkedList<int[]>();
 		final LinkedList<int[]> densityDataSources = new LinkedList<int[]>();
-		int[][] densityData = new int[this.world.width][this.world.height];
+		int[][] densityData = new int[this.world.getWidth()][this.world.getHeight()];
 
 		// for every beehive
-		for (int i = 0; i < this.world.Beehives.size(); i++) {
-			LinkedList<Bee> bees = this.world.Beehives.get(i).bees;
+		for (int i = 0; i < this.world.getBeehives().size(); i++) {
+			LinkedList<Bee> bees = this.world.getBeehives().get(i).getBees();
 
 			// ... for every bee
 			for (Bee b : bees) {
 
 				// ... +1 for the position -> two bees on same place -> 2
-				int actX = b.actualX;
-				int actY = b.actualY;
+				int actX = b.getActualX();
+				int actY = b.getActualY();
 				for (int p = actX - 2;p < actX+2;p++) {
 					for (int q = actY - 2; q < actY + 2; q++) {
-						if ((p > 0) && (p < this.world.width) && (q > 0) && (q < this.world.height)) {
+						if ((p > 0) && (p < this.world.getWidth()) && (q > 0) && (q < this.world.getHeight())) {
 							densityData[p][q] = densityData[p][q] + 1;
 						}
 					}
@@ -82,21 +75,21 @@ public class CreateXYBlockData implements Runnable {
 
 		// it's a big world, so lets reduce the data to places where at least
 		// one bee is
-		for (int j = 0; j < this.world.width; j++) {
-			for (int k = 0; k < this.world.height; k++) {
+		for (int j = 0; j < this.world.getWidth(); j++) {
+			for (int k = 0; k < this.world.getHeight(); k++) {
 				if (densityData[j][k] != 0) {
 					densityDataLL.add(new int[] { j, k, densityData[j][k] });
 				}
-				if (this.world.sourcesMap[j][k] != null) {
-					densityDataSources.add(new int[] {j, k, (int) this.world.sourcesMap[j][k].size * (-1)});
+				if (this.world.getSourcesMap()[j][k] != null) {
+					densityDataSources.add(new int[] {j, k, (int) this.world.getSourcesMap()[j][k].size * (-1)});
 				}
 
 			}
 		}
-		for (Beehive b: this.world.Beehives) {
-			for (int j = b.positionX - 10; j < b.positionX + 10; j++) {
-				for (int k = b.positionY -10; k < b.positionY + 10; k++) {
-					densityDataSources.add(new int[] {j, k, (int) (b.food * (-1) * 10)});
+		for (Beehive b: this.world.getBeehives()) {
+			for (int j = b.getPositionX() - 10; j < b.getPositionX() + 10; j++) {
+				for (int k = b.getPositionY() -10; k < b.getPositionY() + 10; k++) {
+					densityDataSources.add(new int[] {j, k, (int) (b.getFood() * (-1) * 10)});
 				}
 			}
 		}
