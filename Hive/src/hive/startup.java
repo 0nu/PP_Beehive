@@ -7,7 +7,7 @@ import javax.swing.SwingUtilities;
  * This is the starting point of the Bee-Project.
  * 
  * @author ole
- * rgfscacsdfecd
+ * rgfscacsdfecdas
  * yyyxxy
  */
 public class startup {
