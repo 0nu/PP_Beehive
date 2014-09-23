@@ -228,7 +228,7 @@ public class World implements Runnable {
 	}
 
 	public void setHunger(int value) {
-		// TODO Auto-generated method stub
+		// This sets the hunger of the bees.
 		this.hunger = (double) value / 10000;
 		}
 
