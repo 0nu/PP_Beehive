@@ -28,6 +28,7 @@ public class World implements Runnable {
 	private int numOfThisBeehives;
 	private Source[][] sourcesMap;
 	private double hunger;
+	private Random rand;
 
 	/**
 	 * Creates the world.
@@ -55,6 +56,7 @@ public class World implements Runnable {
 		Source[][] sourcesMap = new Source[this.getWidth()][this.getHeight()];
 		this.sourcesMap = sourcesMap;
 		this.hunger = hungry;
+		this.rand = new Random();
 	}
 
 	/**
@@ -78,13 +80,13 @@ public class World implements Runnable {
 	 * @return the created beehive
 	 */
 	Beehive createBeehive(int numberOfBees, int numOfThisBeehive) {
-		int numOfSources = this.sourcesList.size();
+
 
 		// Beehive(this_is_x_position, this_is_y_position,
 		// numberOfBees, the_world,
 		// the_number_of_the_actual_beehive_to_Create, hunger_of_bees)
-		Beehive bh = new Beehive(this.sourcesList.get(numOfSources - 2),
-				this.sourcesList.get(numOfSources - 1), numberOfBees, this,
+		Beehive bh = new Beehive(rand.nextInt(width),
+				rand.nextInt(height), numberOfBees, this,
 				this.numOfThisBeehives, this.hunger);
 
 		addBeeHiveToList(bh);
@@ -125,16 +127,12 @@ public class World implements Runnable {
 
 		// create sourcesList with the X and Y positions for the later created
 		// sources and beehives
-		this.sourcesList = getPosition(this.getWidth(), this.getHeight(), numOfSources,
-				this.sourcesList);
 		trees = new LinkedList<Tree>();
 
 		// now create trees with the positions saved in _scourcesList_
-		for (int i = 0; i < 2 * numOfSources; i = i + 2) { // TODO: iterator as
-			// int[][]
+		for (int i = 1; i <= numOfSources; i++) { 
 
-			trees.add(new Tree(this.sourcesList.get(i), this.sourcesList
-					.get(i + 1), this));
+			trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
 			trees.getLast().setName("Tree " + i);
 			Thread t = new Thread(trees.getLast(), "Tree " + i);
 			t.start();
@@ -201,7 +199,25 @@ public class World implements Runnable {
 			}
 		}
 	}
+	
+	private void removeFromSourceMap(int x, int y, int size, Source source) {
+		Integer radius = Integer.valueOf((int) Math.round(size/1000));
 
+		int xCheck = 0;
+		int yCheck = 0;
+		for (int yIter = -radius; yIter <= radius; yIter++) {
+			for (int xIter = -radius; xIter <= radius; xIter++) {
+				xCheck = xIter+x;
+				yCheck = yIter+y;
+				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< width) && (yCheck < height) && (xCheck > 0) && (yCheck > 0)) {
+					if (this.sourcesMap[xCheck][yCheck] == source) {
+					this.sourcesMap[xCheck][yCheck] = null;     
+					}
+				}
+			}
+		}
+		
+	}
 	public Source hitSource(int x, int y) {
 		return this.sourcesMap[x][y];
 	}
@@ -214,8 +230,7 @@ public class World implements Runnable {
 	public void setHunger(int value) {
 		// TODO Auto-generated method stub
 		this.hunger = (double) value / 10000;
-		System.out.println(value + " " + this.hunger);
-	}
+		}
 
 	/**
 	 * @return the width
@@ -286,4 +301,31 @@ public class World implements Runnable {
 	public void setTableModelTrees(DefaultTableModel tableModelTrees) {
 		this.tableModelTrees = tableModelTrees;
 	}
+
+	public void setTreeNumber(int newCount) {
+		// This changes number of Trees
+		int diff = newCount - this.trees.size();
+		if (diff > 0) {
+			for (int i = 0; i < diff; i++) {
+			trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
+			int size = this.trees.size();
+			trees.getLast().setName("Tree " + (size));
+			
+			Thread t = new Thread(trees.getLast(), "Tree " + (size));
+			t.start();
+			trees.getLast().setPositionInTrees(size);
+			}
+			
+		}
+		else if (diff < 0) {
+			for (int i = 0; i > diff; i--) {
+				Tree t = trees.getLast();
+				this.removeFromSourceMap(t.x, t.y, t.maxsize, t);
+				t.setAlive(false);
+				trees.removeLast();
+			}
+		}
+	}
+
+
 }

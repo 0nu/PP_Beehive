@@ -3,6 +3,7 @@ package guiStuff;
 import hive.World;
 
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.GridLayout;
 
 import javax.swing.JFrame;
@@ -10,8 +11,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
@@ -43,7 +47,7 @@ public class MyGui extends JPanel {
 	 */
 	public MyGui(World world, JFrame frame) {
 		this.world = world;
-		
+
 
 		/*
 		 * ÜVector<Vector<String>> rowData = new Vector<Vector<String>>(50, 5);
@@ -68,13 +72,13 @@ public class MyGui extends JPanel {
 		String[] treeColName = { "Name", "Size", "Max Size", "Quality",
 				"Refresh", "Type", "X", "Y" };
 		JTable treeTable = getJTable(treeColName, jTableTrees);
-		SetUpTableData setUpTableDataTree = new SetUpTableData(treeTable,
+		final SetUpTableData setUpTableDataTree = new SetUpTableData(treeTable,
 				world, "Trees");
 		Thread t = new Thread(setUpTableDataTree);
 		t.start();
 		JScrollPane treeScrollpane = new JScrollPane(treeTable);
 		add(treeScrollpane);
-
+		setUpTableDataTree.update();
 		// this is the beehive table
 		String[] BeehiveColName1 = { "Nameaa", "Size", "X", "Y", "Waiting Bees" };
 		JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
@@ -103,7 +107,7 @@ public class MyGui extends JPanel {
 
 		// change hunger settings
 		final JLabel sliderLabelHunger = new JLabel("Hunger: " + (int) (this.world.getHunger() * 10000));
-		JSlider sliderHunger = new JSlider (0,100,(int) (this.world.getHunger() * 1000));
+		JSlider sliderHunger = new JSlider (0,100,(int) (this.world.getHunger() * 10000));
 		sliderHunger.setPaintTicks(true);
 		sliderHunger.setMajorTickSpacing( 25 );
 		sliderHunger.setMinorTickSpacing( 5 );
@@ -116,7 +120,7 @@ public class MyGui extends JPanel {
 			}
 		} 				)				;
 
-		
+
 		// change size of beehives (only the first beehive at the moment)
 		final JLabel sliderLabelBeehiveSize = new JLabel("Max food of Beehive : " + (this.world.getBeehives().getFirst().getSize()));
 		JSlider sliderBeehiveSize = new JSlider(0,5000, this.world.getBeehives().getFirst().getSize());
@@ -131,9 +135,27 @@ public class MyGui extends JPanel {
 				sliderLabelBeehiveSize.setText("Max food of Beehive : " + (MyGui.this.world.getBeehives().getFirst().getSize()));
 			}
 		} 				)				;
-		
-		
-		
+
+
+		// JSpinner for setting Trees number
+		SpinnerModel trees = new SpinnerNumberModel(10, //initial value
+				0, //min
+				100, //max
+				1);   //step
+		JSpinner treeSpinner = addLabeledSpinner(control,
+				"Anzahl der Baeume",
+				trees);
+		treeSpinner.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner source = (JSpinner) e.getSource();
+				MyGui.this.world.setTreeNumber((int) source.getValue());
+				setUpTableDataTree.update();
+
+			}
+		});
+
 		// add all the sliders and labels
 		control.add(sliderLabelHunger);
 		control.add(sliderHunger);
@@ -150,6 +172,20 @@ public class MyGui extends JPanel {
 		Thread ref = new Thread(refresh);
 		ref.start();
 
+	}
+
+
+	static protected JSpinner addLabeledSpinner(Container c,
+			String label,
+			SpinnerModel model) {
+		JLabel l = new JLabel(label);
+		c.add(l);
+
+		JSpinner spinner = new JSpinner(model);
+		l.setLabelFor(spinner);
+		c.add(spinner);
+
+		return spinner;
 	}
 
 	/**

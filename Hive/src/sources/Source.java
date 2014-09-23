@@ -17,7 +17,8 @@ public class Source extends Thread {
 	public String type;
 	private World world;
 	private int ListIndex;
-
+	private boolean alive;
+	
 	/**
 	 * run method, nothing here.
 	 */
@@ -39,7 +40,7 @@ public class Source extends Thread {
 		// - position in world X & Y
 		//
 		this.world = world;
-		while (true) {
+		while (alive) {
 			if (this.size < this.maxsize) {
 				this.size = this.size + this.recovery;
 				if (this.size > this.maxsize) {
@@ -70,15 +71,22 @@ public class Source extends Thread {
 				foodreturn = 1;
 				this.size--;
 				if (world.getTableModelTrees() != null) {
+					try {
 					world.getTableModelTrees().setValueAt(
 							Integer.toString(this.size),
 							ListIndex, 1);
 				}
+					catch (ArrayIndexOutOfBoundsException e){
+						foodreturn = 0;
+						
+					}
+				}
 			} else {
 				foodreturn = 0;
-				//System.out.println(this + " is empty");
+				
 			}
 			return foodreturn;
+			
 
 		}
 	}
@@ -92,5 +100,17 @@ public class Source extends Thread {
 		// sets index information of trees list -> no need for a time consuming search on every update
 		ListIndex = indexOf;
 		
+	}
+
+	/**
+	 * @return the alive
+	 */
+
+
+	/**
+	 * @param alive the alive to set
+	 */
+	public void setAlive(boolean alive) {
+		this.alive = alive;
 	}
 }

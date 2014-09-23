@@ -24,6 +24,7 @@ public class Tree extends Source {
 		this.size = this.rand.nextInt(10000);
 		maxsize = this.size;
 		this.recovery = this.rand.nextInt(100) + 1;
+		setAlive(true);
 
 
 	}
@@ -33,6 +34,11 @@ public class Tree extends Source {
 		grow(world);
 
 
+	}
+
+	public void removePositionInTrees(int i) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

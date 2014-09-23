@@ -30,7 +30,7 @@ public class startup {
 		worldX = 500;
 		worldY = 600;
 		numOfSources = 50;
-		numOfTrees = 50; // TODO: check for sinnvolle number
+		numOfTrees = 10; // TODO: check for sinnvolle number
 
 		// this will create the world
 		final World myWorld = new World(worldX, worldY, numOfBeehives,
