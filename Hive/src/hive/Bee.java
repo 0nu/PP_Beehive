@@ -10,13 +10,13 @@ import sources.SourceInterface;
 /**
  * The bee - lots of information is stored here. Each bee object is meant to be
  * run as single thread, as there are lots of actions, interactions, decisions
- * and death (not implemented yet).dcvdhhb
+ * and death (not implemented yet).sdfcc
  * 
  * @author ole
  * 
  */
 
-// TODO: Death of the bee.
+// TODO: Death of the bee. still.
 public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	int homeX;
 	int homeY;
