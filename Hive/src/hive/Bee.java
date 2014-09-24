@@ -85,57 +85,66 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		// this method is called every time the status changes.
 
 		while (true) {
-			switch (this.getStatus()) {
-			case "arrived":
-				arrived();
-				break;
-			case "waiting":
-				this.ownHive.waitingQueueAdd(this);
-				eat();
-				break;
-			case "searching":
-				// let her fly to a random start point
-				//this.removeFromQueue(this.beehive, actualBee);
-				flight(
-						this.rand.nextInt(this.beehive.world.getWidth()),
-						this.rand.nextInt(this.beehive.world.getHeight()),
-						"searching");
-				if (this.getStatus() == "searching") {
-					search();
-				}
-				break;
-			case "starting":
-				starting();
-				break;
-			case "empty":
-				search();
-				break;
-			case "foundSth":
-				foundSth();
-				break;
-			case "full":
-				goBackHome();
-				break;
-			case "arrivedathome":
-				this.actualX = this.homeX;
-				this.actualY = this.homeY;
-				this.atHome = true;
-				this.giveStuff(this.beehive, this);
-				if (this.getStatus() == "waiting") {
-					break; 
-				} else {
-
-					this.setStatus("startDancing");
+			if (world.isStartModel()) {
+				switch (this.getStatus()) {
+				case "arrived":
+					arrived();
 					break;
+				case "waiting":
+					this.ownHive.waitingQueueAdd(this);
+					eat();
+					break;
+				case "searching":
+					// let her fly to a random start point
+					//this.removeFromQueue(this.beehive, actualBee);
+					flight(
+							this.rand.nextInt(this.beehive.world.getWidth()),
+							this.rand.nextInt(this.beehive.world.getHeight()),
+							"searching");
+					if (this.getStatus() == "searching") {
+						search();
+					}
+					break;
+				case "starting":
+					starting();
+					break;
+				case "empty":
+					search();
+					break;
+				case "foundSth":
+					foundSth();
+					break;
+				case "full":
+					goBackHome();
+					break;
+				case "arrivedathome":
+					this.actualX = this.homeX;
+					this.actualY = this.homeY;
+					this.atHome = true;
+					this.giveStuff(this.beehive, this);
+					if (this.getStatus() == "waiting") {
+						break; 
+					} else {
+
+						this.setStatus("startDancing");
+						break;
+					}
+
+				case "startDancing":
+					dance();
+					break;
+
 				}
-				
-			case "startDancing":
-				dance();
-				break;
+			}
+			try {
+				Thread.currentThread();
+				Thread.sleep(500);
+			} catch (InterruptedException a) {
 
 			}
 		}
 	}
+
 
 	/**
 	 * Bee has knowledge and arrived at source -> Get food
@@ -174,9 +183,10 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 			 * this.actualY + this.rand.nextInt(10) - 5;
 			 */
 			try {
-				Thread.currentThread();
-				Thread.sleep(500); // 1000 milliseconds is one
-				// second.
+				while (!world.isStartModel()) {
+					Thread.sleep(500);
+				}
+				Thread.sleep(500); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
@@ -194,6 +204,9 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		do {
 
 			try {
+				while (!world.isStartModel()) {
+					Thread.sleep(500);
+				}
 				Thread.sleep(900); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
@@ -265,9 +278,10 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 			this.actualX = (int) (this.actualX + diffX);
 			this.actualY = (int) (this.actualY + diffY);
 			try {
-				Thread.currentThread();
-				Thread.sleep(1000); // 1000 milliseconds is one
-				// second.
+				while (!world.isStartModel()) {
+					Thread.sleep(500);
+				}
+				Thread.sleep(1000); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
@@ -420,8 +434,8 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 
 		synchronized (this.ownHive) {
 			if (beehive.getFood() < beehive.getSize()) {
-			beehive.setFood(beehive.getFood() + 1);
-			bee.food = 0;
+				beehive.setFood(beehive.getFood() + 1);
+				bee.food = 0;
 			} else {
 				bee.setStatus("waiting");
 				this.bee.removeKnow();
@@ -434,22 +448,22 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		// just a little helper to run eat() synced
 		this.ownHive.eat();
 	}
-	
+
 
 	@Override
 	public void addToQueue(Beehive beehive, Bee bee) {
 		// Add submitted bee to submitted beehive.waitingQueue
-		
-			beehive.waitingQueueAdd(bee);
-		
+
+		beehive.waitingQueueAdd(bee);
+
 		refreshTableModel();
 	}
 
 	@Override
 	public void removeFromQueue(Beehive beehive, Bee bee) {
 		// remove submitted Bee from submitted Beehive.waitingQueue
-			beehive.waitingQueueRemove(bee);
-		
+		beehive.waitingQueueRemove(bee);
+
 		refreshTableModel();
 	}
 
@@ -459,7 +473,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		// dancing lessons
 		ArrayList<Bee> beeSublist = new ArrayList<Bee>();
 		beeSublist = beehive.waitingQueueSublist(count);
-		
+
 		refreshTableModel();
 		return beeSublist;
 	}

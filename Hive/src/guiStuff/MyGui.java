@@ -5,7 +5,10 @@ import hive.World;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -32,7 +35,7 @@ import org.jfree.data.xy.XYZDataset;
  * @author ole
  *
  */
-public class MyGui extends JPanel {
+public class MyGui extends JPanel implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	World world;
 	private JTable jTableTrees;
@@ -155,12 +158,19 @@ public class MyGui extends JPanel {
 
 			}
 		});
+		
+		// This is the button to start the odel
+		JButton startBtn = new JButton("Start Model");
+		startBtn.setActionCommand("start");
+		startBtn.addActionListener(this);
+		
 
 		// add all the sliders and labels
 		control.add(sliderLabelHunger);
 		control.add(sliderHunger);
 		control.add(sliderLabelBeehiveSize);
 		control.add(sliderBeehiveSize);
+		control.add(startBtn);
 
 		add(control);
 
@@ -271,6 +281,23 @@ public class MyGui extends JPanel {
 		contactTableModel.setColumnIdentifiers(colName);
 		jTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		return jTable;
+	}
+
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		// TODO Auto-generated method stub
+		JButton source = (JButton) e.getSource(); 
+		if ("start".equals(source.getActionCommand())) {
+			this.world.startModel();
+			source.setText("Stop Model");
+			source.setActionCommand("stop");
+		}
+		else {
+			this.world.stopModel();
+			source.setText("Start Model");
+			source.setActionCommand("start");
+		}
 	}
 
 }

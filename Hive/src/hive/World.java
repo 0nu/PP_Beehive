@@ -16,7 +16,7 @@ import sources.Tree;
  * @author ole
  * 
  */
-public class World implements Runnable {
+public class World  {
 	private int width;
 	private int height;
 	ArrayList<Integer> sourcesList;
@@ -29,6 +29,8 @@ public class World implements Runnable {
 	private Source[][] sourcesMap;
 	private double hunger;
 	private Random rand;
+	private LinkedList<Bee> bees;
+	private boolean startModel;
 
 	/**
 	 * Creates the world.
@@ -49,6 +51,7 @@ public class World implements Runnable {
 	// constructor
 	World(int width, int height, int numOfBeehives, int numOfSources,
 			int numOfTrees, double hungry) {
+		startModel = false;
 		this.setWidth(width);
 		this.setHeight(height);
 		this.Beehives = new LinkedList<Beehive>();
@@ -57,15 +60,13 @@ public class World implements Runnable {
 		this.sourcesMap = sourcesMap;
 		this.hunger = hungry;
 		this.rand = new Random();
+		bees = new LinkedList<Bee>();
 	}
 
 	/**
 	 * On .start() a println is given out.
 	 */
-	public void run() {
-		// some basic information of the world we live in
-		System.out.println("World created");
-	}
+
 
 	/**
 	 * Creates the beehive(s), one per time. Adds the created beehive to the
@@ -327,5 +328,58 @@ public class World implements Runnable {
 		}
 	}
 
+	public void createBees(int numOfBees) {
+		// create all the bees and add each one to the list. start each bee with
+		// own thread.
+		for (int j = 0; j < numOfBeehives; j++)
+		for (int i = 0; i < numOfBees; i++) {
+			this.bees.add(new Bee(this, Beehives.get(j)));
+			Thread t = new Thread(this.bees.getLast(), "Bee " + i);
+			// Thread t = new Thread(bees.get(i), "Bee " + i);
+			//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
+			t.start();
+
+		}
+	}
+
+	/**
+	 * @return the bees
+	 */
+	public LinkedList<Bee> getBees() {
+		return bees;
+	}
+
+	/**
+	 * @param bees the bees to set
+	 */
+	public void setBees(LinkedList<Bee> bees) {
+		this.bees = bees;
+	}
+
+	public void startModel() {
+		// Here the threads are started
+		startModel = true;
+		
+	}
+
+	public void stopModel() {
+		// This pauses the threads
+		startModel = false;
+		
+	}
+
+	/**
+	 * @return the startModel
+	 */
+	public boolean isStartModel() {
+		return startModel;
+	}
+
+	/**
+	 * @param startModel the startModel to set
+	 */
+	public void setStartModel(boolean startModel) {
+		this.startModel = startModel;
+	}
 
 }

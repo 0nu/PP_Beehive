@@ -37,16 +37,16 @@ public class startup {
 				numOfSources, numOfTrees,hungry);
 		myWorld.createSources(numOfTrees);
 
-		// create the beehives as own threads
+		// create the beehives and bees
 		for (int i = 0; i < numOfBeehives; i++) {
 			// the beehive gets the number of bees to create in it, the number
 			// of this beehive (only for naming the object/thread, and the
 			// hunger of the bees
-			Thread p = new Thread(myWorld.createBeehive(numOfBees, i));
-			p.start();
-
+			myWorld.createBeehive(numOfBees, i);
+			
 		}
-
+		myWorld.createBees(numOfBees);
+		
 		// following stuff is for the Gui
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {

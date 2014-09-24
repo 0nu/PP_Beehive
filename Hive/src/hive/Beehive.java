@@ -16,7 +16,7 @@ public class Beehive implements Runnable {
 	private int positionY;
 	int numOfBees;
 	private double food;
-	private LinkedList<Bee> bees;
+
 	World world;
 	private ArrayList<Bee> waitingQueue;
 	Random rand;
@@ -50,29 +50,9 @@ public class Beehive implements Runnable {
 		this.world = world;
 		this.waitingQueue = new ArrayList<Bee>();
 		this.rand = new Random();
-		bees = new LinkedList<Bee>();
 		this.size = (int)food;
 
-		// create all the bees and add each one to the list. start each bee with
-		// own thread.
-		for (int i = 0; i < numOfBees; i++) {
-			this.bees.add(new Bee(this.world, this));
-			Thread t = new Thread(this.bees.getLast(), "Bee " + i);
-			// Thread t = new Thread(bees.get(i), "Bee " + i);
-			//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
-			t.start();
 
-		}
-		// print out some information
-		System.out.println(Thread.currentThread().getName() + "Beehive X: "
-				+ positionX + "Y: " + positionY);
-		System.out
-		.println(Thread.currentThread().getName() + "beehive created");
-
-		// showFood thread only prints out some actual information about the
-		// beehive. see the method for more information.
-		/* Thread p = new Thread(new ShowFood(this), "ShowFood");
-		p.start(); */
 		this.name = "Beehive " + num;
 	}
 
@@ -248,14 +228,14 @@ public class Beehive implements Runnable {
 	 * @return the bees
 	 */
 	public LinkedList<Bee> getBees() {
-		return bees;
+		return this.world.getBees();
 	}
 
 	/**
 	 * @param bees the bees to set
 	 */
 	public void setBees(LinkedList<Bee> bees) {
-		this.bees = bees;
+		this.world.setBees(bees);
 	}
 
 	/**

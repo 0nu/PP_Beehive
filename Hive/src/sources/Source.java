@@ -50,9 +50,10 @@ public class Source extends Thread {
 			
 
 			try {
-				Thread.currentThread();
-				Thread.sleep(10000); // 1000 milliseconds is one
-										// second.
+				while (!world.isStartModel()) {
+					Thread.sleep(500);
+				}
+				Thread.sleep(10000); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
