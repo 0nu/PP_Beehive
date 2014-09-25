@@ -1,5 +1,7 @@
 package sources;
 
+import java.util.Random;
+
 import hive.World;
 
 /**
@@ -18,7 +20,9 @@ public class Source extends Thread {
 	private World world;
 	private int ListIndex;
 	private boolean alive;
-	
+	protected Random rand;
+	public int updateCount;
+
 	/**
 	 * run method, nothing here.
 	 */
@@ -47,17 +51,25 @@ public class Source extends Thread {
 					this.size = this.maxsize;
 				}
 			}
-			
+
 
 			try {
 				while (!world.isStartModel()) {
 					Thread.sleep(500);
 				}
-				Thread.sleep(10000); // 1000 milliseconds is one second.
+				Thread.sleep((int) Math.round(10000 * getWaitTime())); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 		}
+	}
+
+	private double getWaitTime() {
+		// Returns WaitTime factor depending on worldSpeed
+		// init value is 40 
+		double factor = 20;
+		factor = factor / this.world.getWorldSpeed();
+		return factor;
 	}
 
 	/**
@@ -66,52 +78,52 @@ public class Source extends Thread {
 	 */
 	public int getFood() {
 		int foodreturn;
-
-		synchronized (this) {
-			if (this.size >= 1) {
-				foodreturn = 1;
-				this.size--;
-				if (world.getTableModelTrees() != null) {
-					try {
+		if (this.size >= 1) {
+			foodreturn = 1;
+			synchronized (this) {
+				if (this.size >=1){
+					this.size--;
+				}
+			}
+			this.updateCount++;
+			if ((world.getTableModelTrees() != null) && (this.updateCount > ((world.getUpdateSpeed() -100) * (-1))) && world.getUpdateSpeed() != 0) {
+				this.updateCount = 0;
+				try {
 					world.getTableModelTrees().setValueAt(
 							Integer.toString(this.size),
 							ListIndex, 1);
 				}
-					catch (ArrayIndexOutOfBoundsException e){
-						foodreturn = 0;
-						
-					}
-				}
-			} else {
-				foodreturn = 0;
-				
-			}
-			return foodreturn;
-			
-
+				catch (ArrayIndexOutOfBoundsException e){
+					foodreturn = 0;
+				} 
+			} 
+		} else {
+			foodreturn = 0;
 		}
-	}
-	void addToSourceMap (World world) {
-		this.world = world;
-		this.world.addToSourceMap(this.x,this.y,this.size, this);
-		
-	}
-	
-	public void setPositionInTrees(int indexOf) {
-		// sets index information of trees list -> no need for a time consuming search on every update
-		ListIndex = indexOf;
-		
+		return foodreturn;
 	}
 
-	/**
-	 * @return the alive
-	 */
+void addToSourceMap (World world) {
+	this.world = world;
+	this.world.addToSourceMap(this.x,this.y,this.size, this);
+
+}
+
+public void setPositionInTrees(int indexOf) {
+	// sets index information of trees list -> no need for a time consuming search on every update
+	ListIndex = indexOf;
+
+}
+
+/**
+ * @return the alive
+ */
 
 
-	/**
-	 * @param alive the alive to set
-	 */
-	public void setAlive(boolean alive) {
-		this.alive = alive;
-	}
+/**
+ * @param alive the alive to set
+ */
+public void setAlive(boolean alive) {
+	this.alive = alive;
+}
 }

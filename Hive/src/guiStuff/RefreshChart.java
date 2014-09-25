@@ -40,54 +40,66 @@ public class RefreshChart implements Runnable {
 	public void run() {
 		// TODO Auto-generated method stub
 
-        LookupPaintScale scale = new LookupPaintScale(-10000, 10000, Color.white);
-        
-        // these are the gradient colors for the beehive and the trees
-        // green -> full, red -> empty
-        int red = 0;
-        int green = 255;
-        int blue = 0;
-        double scaling = 10000 / 255;
-        double gradient = -10000;
-        
-        for (green = 255; green >= 0; green--) {
-        	scale.add(gradient = gradient + scaling, new Color(red, green, blue));
-        	red++;
-        }
-        
-        scale.add(0.0, Color.red);
-        scale.add(1.0, Color.orange);
-        scale.add(2.0, Color.yellow);
-        scale.add(3.0, Color.red);
-        
-        // and then we need colors for the bees
-        // yellow -> 1 bee
-        // white -> lots of bees
-        red = 255;
-        green = 255;
-        blue = 0;
-        scaling = 10000 / 255;
-        gradient = 1;
-        
-        for (blue = 0; blue <= 255; blue++) {
-        	scale.add(gradient = gradient + scaling, new Color(red, green, blue));
-        	        }
-        
-        
+		LookupPaintScale scale = new LookupPaintScale(-10000, 50000, Color.orange);
+
+		// these are the gradient colors for the beehive and the trees
+		// green -> full, red -> empty
+		int red = 0;
+		int green = 255;
+		int blue = 0;
+		double scaling = 10000 / 255;
+		double gradient = -10000;
+
+		for (green = 255; green >= 0; green--) {
+			scale.add(gradient = gradient + scaling, new Color(red, green, blue));
+			red++;
+		}
+
+		scale.add(-0.1, Color.red);
+		//scale.add(1.0, new Color(255,140,0));
+		//scale.add(2.0, Color.black);
+
+		// and then we need colors for the bees
+		// yellow -> 1 bee
+		// white -> lots of bees
+		red = 255;
+		green = 255;
+		blue = 0;
+		scaling = 3000 / 255;
+		gradient = 0-scaling;
+		int alpha = 20;
+
+		for (blue = 0; blue <= 255; blue++) {
+			scale.add(gradient  = gradient +  scaling, new Color(red, green, blue,alpha));
+			if (alpha < 255) {
+				alpha++;
+			}
+		}
+		int height = this.world.getHeight();
+		int width = this.world.getWidth();
 		while (true) {
+			if (!this.world.isStartModel()) {
+				try { Thread.sleep(500); // 1000 milliseconds is one second. }
+				} catch (InterruptedException ex) {
+					Thread.currentThread().interrupt(); }
+			}
+			//long startTimeNano = System.nanoTime( );
+			this.chart = createChart(new CreateXYBlockData(world).getDataset(width,height), scale);
+
 			/*
-			 * try { Thread.sleep(100); // 1000 milliseconds is one second. }
-			 * catch (InterruptedException ex) {
-			 * Thread.currentThread().interrupt(); }
+			long endTimeNano = System.nanoTime( );
+			System.out.println("createChart: " + (endTimeNano - startTimeNano));
 			 */
-			
-			this.chart = createChart(new CreateXYBlockData(world).getDataset(), scale);
-			this.chart.fireChartChanged();
-			new ChartPanel(chart);
+			//startTimeNano = System.nanoTime( );
+			//new ChartPanel(chart);
 			// this.chartPanel = chartPanel;
 			this.chartPanel.setChart(this.chart);
-			this.chartPanel.updateUI();
-			// this.frame.setContentPane(this.chartPanel);
+
+			//long startTimeNano = System.nanoTime( );
+			//this.chartPanel.updateUI();
+			/*long endTimeNano = System.nanoTime( );
+
+			System.out.println("updategui: " + (endTimeNano - startTimeNano));*/
 
 		}
 	}
@@ -98,28 +110,35 @@ public class RefreshChart implements Runnable {
 	 * @return the JFreeChart
 	 */
 	JFreeChart createChart(XYZDataset dataset, LookupPaintScale scale) {
-		NumberAxis xAxis = new NumberAxis("X");
+		NumberAxis xAxis = new NumberAxis();
 		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		xAxis.setLowerMargin(0.0);
 		xAxis.setUpperMargin(0.0);
 		xAxis.setRange(0, world.getWidth());
-		NumberAxis yAxis = new NumberAxis("Y");
+		xAxis.setTickLabelsVisible(false);
+		xAxis.setTickMarksVisible(false);
+		NumberAxis yAxis = new NumberAxis();
 		yAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		yAxis.setLowerMargin(0.0);
 		yAxis.setUpperMargin(0.0);
 		yAxis.setRange(0, world.getHeight());
+		yAxis.setTickLabelsVisible(false);
+		yAxis.setTickMarksVisible(false);
 		XYBlockRenderer renderer = new XYBlockRenderer();
-		 //LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
+		//LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
 		//PaintScale scale = new GrayPaintScale(-10000, 100);
-        renderer.setPaintScale(scale);
+		renderer.setPaintScale(scale);
 		XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
-		plot.setBackgroundPaint(Color.lightGray);
+		plot.setBackgroundPaint(Color.black);
 		plot.setDomainGridlinesVisible(false);
+		plot.setRangeGridlinesVisible(false);
+		plot.setDomainMinorGridlinesVisible(false);
+		plot.setRangeMinorGridlinesVisible(false);
 		// plot.setRangeGridlinePaint(Color.white);
-		JFreeChart chart = new JFreeChart("XYBlockChartDemo1", plot);
+		JFreeChart chart = new JFreeChart(plot);
 		chart.removeLegend();
 		chart.setBackgroundPaint(Color.white);
 		return chart;
-	
+
 	}
 }

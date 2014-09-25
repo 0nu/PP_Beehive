@@ -1,5 +1,6 @@
 package hive;
 
+import java.io.Serializable;
 import java.util.Random;
 import java.util.LinkedList;
 import java.util.ArrayList;
@@ -11,7 +12,12 @@ import java.util.ArrayList;
  * @author ole
  * 
  */
-public class Beehive implements Runnable {
+public class Beehive implements Runnable, Serializable
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5404284857273245055L;
 	private int positionX;
 	private int positionY;
 	int numOfBees;
@@ -19,7 +25,7 @@ public class Beehive implements Runnable {
 
 	World world;
 	private ArrayList<Bee> waitingQueue;
-	Random rand;
+	private Random rand;
 	boolean sendout;
 	private String name;
 	int size;
@@ -51,6 +57,7 @@ public class Beehive implements Runnable {
 		this.waitingQueue = new ArrayList<Bee>();
 		this.rand = new Random();
 		this.size = (int)food;
+		food = 880;
 
 
 		this.name = "Beehive " + num;
@@ -60,8 +67,37 @@ public class Beehive implements Runnable {
 	 * run method. nothing happens here.
 	 */
 	public void run() {
+		while (true) {
+			try {
+				while (!world.isStartModel()) {
+					Thread.sleep(500);
+				}
+				//System.out.println(getWaitTime());
+				Thread.sleep((int) Math.round(900 * getWaitTime())); // 1000 milliseconds is one second.
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 
+			eat();
+			sendout();
+		}
 	}
+
+	private void sendout() {
+		if (this.food < (0.9 * this.size)) {
+			this.waitingQueueSetStatus("searching",0);
+		}
+	}
+
+
+	private double getWaitTime() {
+		// Returns WaitTime factor depending on worldSpeed
+		// init value is 40 
+		double factor = 20;
+		factor = factor / this.world.getWorldSpeed();
+		return factor;
+	}
+
 
 	/**
 	 * Not needed at the moment. Can probably be removed.
@@ -86,32 +122,25 @@ public class Beehive implements Runnable {
 	 */
 	public synchronized int eat() {
 		int empty;
-		if (this.food > 0) {
-			this.food = this.food - this.world.getHunger();
+		if (this.food >= (this.world.getHunger() * this.getWaitingQueueSize()) ) {
+			this.food = this.food - (this.world.getHunger() * this.getWaitingQueueSize());
 			empty = 0;
 
 			// change the tableModel for the gui
 			// but only change when the table is already created
 			// ... and rand = 10 <- this is ugly but saves some cpu time
-			if (world.tableModelBeehives != null && this.rand.nextInt(10) == 1) {// TODO:
-				// tableModelBeehives
-				// update
-				// more
-				// pretty
-				// &
-				// fast
-				world.tableModelBeehives.setValueAt(Double.toString(this.food),
-						this.IndexInBeehiveList, 1); // TODO:
-				
-			}
-			if (this.food < 990 && !this.sendout) {
-				// If the food gets to low, let some bees search for food
-				Thread t = new Thread(new BeeSearch(this));
-				t.start();
-				this.sendout = true;
+			//if (world.tableModelBeehives != null && this.rand.nextInt(world.getUpdateSpeed() + 1) == 2) {// TODO:
+			// tableModelBeehives
+			// update
+			// more
+			// pretty
+			// &
+			// fast
+			world.tableModelBeehives.setValueAt(Double.toString(this.food),
+					this.IndexInBeehiveList, 1); // TODO:
 
-			}
 		} else {
+			this.food= 0;
 			empty = 1;
 
 		}
@@ -146,7 +175,6 @@ public class Beehive implements Runnable {
 		// removes bee from waiting queue
 		synchronized (waitingQueue) {
 			waitingQueue.remove(bee);	
-			System.out.println("wq Remove single: " + bee);
 		}
 
 	}
@@ -158,10 +186,10 @@ public class Beehive implements Runnable {
 
 			// check whether queue is big enough
 			if (waitingQueue.size() >= count) {
-				
+
 				beeSublist = new ArrayList<Bee>(
 						waitingQueue.subList(0, count));
-						waitingQueue.subList(0, count).clear();
+				waitingQueue.subList(0, count).clear();
 
 				// if it's empty, give back empty array
 			} else if (waitingQueue.isEmpty()) {
@@ -212,7 +240,7 @@ public class Beehive implements Runnable {
 	public void setIndexInBeehiveList(int indexOf) {
 		// sets index of this beehive in beehive list
 		IndexInBeehiveList = indexOf;
-		
+
 	}
 	private void refreshTableModel() {
 		if (this.world.tableModelBeehives != null) {

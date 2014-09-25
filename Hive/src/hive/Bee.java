@@ -1,5 +1,6 @@
 package hive;
 
+import java.io.Serializable;
 import java.util.Random;
 //import java.util.LinkedList;
 import java.util.ArrayList;
@@ -17,7 +18,11 @@ import sources.SourceInterface;
  */
 
 // TODO: Death of the bee. still.
-public class Bee implements Runnable, SourceInterface, BeehiveInterface {
+public class Bee implements Runnable, SourceInterface, BeehiveInterface, Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8026916698774991257L;
 	int homeX;
 	int homeY;
 	private int actualX;
@@ -40,6 +45,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	String sourceType;
 	double sourceSize;
 	private Beehive beehive;
+	private boolean alive;
 
 	/**
 	 * Constructor method. Add to waiting queue, as bee is born in beehive and
@@ -63,6 +69,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		this.world = world;
 		this.rand = new Random();
 		this.beehive = ownHive;
+		this.setAlive(true);
 	}
 
 	/**
@@ -84,7 +91,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	private void switcher() {
 		// this method is called every time the status changes.
 
-		while (true) {
+		while (this.alive) {
 			if (world.isStartModel()) {
 				switch (this.getStatus()) {
 				case "arrived":
@@ -101,9 +108,9 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 							this.rand.nextInt(this.beehive.world.getWidth()),
 							this.rand.nextInt(this.beehive.world.getHeight()),
 							"searching");
-					if (this.getStatus() == "searching") {
+					/*if (this.getStatus() == "searching") {
 						search();
-					}
+					}*/
 					break;
 				case "starting":
 					starting();
@@ -150,9 +157,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	 * Bee has knowledge and arrived at source -> Get food
 	 */
 	private void arrived() {
-
-		this.getStuff(this.source, this);
-
+		foundSth();
 	}
 
 	/**
@@ -166,9 +171,9 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 
 		do {
 			int xNext = this.actualX
-					- this.rand.nextInt(11) + 5;
+					- this.rand.nextInt(5) + 2;
 			int yNext = this.actualY
-					- this.rand.nextInt(11) + 5;
+					- this.rand.nextInt(5) + 2;
 
 			if (xNext > 0 && xNext < this.beehive.world.getWidth()) {
 				this.actualX = xNext;
@@ -186,7 +191,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 				while (!world.isStartModel()) {
 					Thread.sleep(500);
 				}
-				Thread.sleep(500); // 1000 milliseconds is one second.
+				Thread.sleep((int) Math.round(500 * getWaitTime())); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
@@ -207,15 +212,15 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 				while (!world.isStartModel()) {
 					Thread.sleep(500);
 				}
-				Thread.sleep(900); // 1000 milliseconds is one second.
+				Thread.sleep((int) Math.round(900 * getWaitTime())); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 
-			this.eat(this.beehive);
+			//this.eat(this.beehive);
 
 			// ... until status is changed
-		} while (this.getStatus().equals("waiting"));
+		} while ((this.getStatus().equals("waiting")) &&  this.alive);
 
 		// what do next? depending on the status.
 
@@ -230,9 +235,11 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 
 		Source foundSource = this.world.hitSource(this.actualX,this.actualY);
 		if (foundSource != null) {
+			//System.out.println("src_X: " + foundSource.x  + ", src_Y: " + foundSource.y +  ", x: " + this.actualX + ", y: " + this.actualY);
 			this.actualX = foundSource.x;
 			this.actualY = foundSource.y;
 			this.getStuff(foundSource, this);
+
 		}
 
 	}
@@ -257,47 +264,53 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	 * @return bee object, probably not needed (?)
 	 */
 	private void flight(int destX, int destY, String destination) {
-		// TODO: code a better method for shorter flights, return bee - why?
+
 		double diffX = destX - this.actualX;
 		double diffY = destY - this.actualY;
+		double flightX = this.actualX;
+		double flightY = this.actualY;
 
 		// we need the shortest way between Bee and destination
 		double length = Math.sqrt(diffX * diffX + diffY * diffY);
 
 		// and now divide that up by the way a bee flights during 1 timeperiod
-		int steps = (int) (length / 20);
+		int steps = (int) Math.round(length / 2);
 		if (steps == 0) {
 			steps = 1;
 		}
 		// and now divide the two differences by step count
-		diffX = (int) diffX / steps;
-		diffY = (int) diffY / steps;
-		int i;
+		diffX = diffX / steps;
+		diffY = diffY / steps;
 
-		for (i = 1; i < steps; i++) {
-			this.actualX = (int) (this.actualX + diffX);
-			this.actualY = (int) (this.actualY + diffY);
+		for (int i = 1; i < steps; i++) {
+			flightX = flightX + diffX;
+			flightY = flightY + diffY;
+			this.actualX = (int)flightX;
+			this.actualY = (int)flightY;
 			try {
 				while (!world.isStartModel()) {
 					Thread.sleep(500);
 				}
-				Thread.sleep(1000); // 1000 milliseconds is one second.
+				Thread.sleep((int) Math.round(100 * getWaitTime())); // 1000 milliseconds is one second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
-			if (destination == "search") {
+
+			if (destination == "searching") {
 				foundSth();
 				if (this.getStatus().equals("full")) {
 					break;
 				}
 			}
 		}
+		/*
+		System.out.println("actx: " + this.actualX + ", destX: " + destX + ", diff: " + (this.actualX - destX));
+		System.out.println("acty: " + this.actualY + ", destY: " + destY + ", diff: " + (this.actualY - destY));
+		System.out.println("diffx: " + diffX + ", diffy: " + diffY + ", steps:" + steps);
+		 */
 
-		// TODO: smarter way of computing pathway, problem is the int vs double
-		// thing
-		this.actualX = destX;
-		this.actualY = destY;
-
+		/*this.actualX = destX;
+		this.actualY = destY;*/
 
 		// there are several possibilities what to do next, depending on the
 		// _destination_ string submitted:
@@ -312,10 +325,17 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		case "home":
 			this.setStatus("arrivedathome");
 			break;
-
 		}
 
 
+	}
+
+	private double getWaitTime() {
+		// Returns WaitTime factor depending on worldSpeed
+		// init value is 40 
+		double factor = 20;
+		factor = factor / this.world.getWorldSpeed();
+		return factor;
 	}
 
 	/**
@@ -382,7 +402,10 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 
 		}
 		for (Bee b : danceQueue) {
-			this.beehive.waitingQueueAdd(b);
+			synchronized (b) {
+				b.setStatus("waiting");
+				this.beehive.waitingQueueAdd(b);
+			}
 		}
 		this.setStatus("starting");
 
@@ -394,6 +417,8 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	 */
 	private void starting() {
 		this.atHome = false;
+		this.actualX = this.actualX + (rand.nextInt(6) - 3);
+		this.actualY = this.actualY + (rand.nextInt(6) - 3);
 		flight(this.sourceX, this.sourceY, "getFood");
 
 	}
@@ -413,7 +438,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 			this.bee.sourceQual = 0;
 			this.bee.sourceType = "";
 			this.bee.sourceSize = 0;
-			this.bee.setStatus("empty");
+			this.bee.setStatus("searching");
 			this.bee.removeKnow();
 			// ... if the source is not empty, bee has food now.
 		} else {
@@ -473,6 +498,9 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 		// dancing lessons
 		ArrayList<Bee> beeSublist = new ArrayList<Bee>();
 		beeSublist = beehive.waitingQueueSublist(count);
+		for (Bee b:beeSublist) {
+			b.setStatus("gettingInformation");
+		}
 
 		refreshTableModel();
 		return beeSublist;
@@ -552,5 +580,26 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface {
 	 */
 	public void setActualY(int actualY) {
 		this.actualY = actualY;
+	}
+	public void setAlive(boolean alive) {
+		if (!alive) {
+			while (this.getStatus().equals("gettingInformation")) {
+				try {
+					Thread.currentThread();
+					Thread.sleep(500);
+				} catch (InterruptedException a) {
+
+				}
+			}
+			switch (this.getStatus()) {
+			case "waiting":
+				removeFromQueue(ownHive, this);
+				break;
+			}
+			this.alive = alive;
+
+		} else {
+			this.alive = alive;
+		}
 	}
 }

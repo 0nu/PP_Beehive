@@ -7,8 +7,18 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
+import javax.imageio.stream.FileImageInputStream;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -77,17 +87,17 @@ public class MyGui extends JPanel implements ActionListener{
 		JTable treeTable = getJTable(treeColName, jTableTrees);
 		final SetUpTableData setUpTableDataTree = new SetUpTableData(treeTable,
 				world, "Trees");
-		Thread t = new Thread(setUpTableDataTree);
+		Thread t = new Thread(setUpTableDataTree,"SetUpTableTree");
 		t.start();
 		JScrollPane treeScrollpane = new JScrollPane(treeTable);
 		add(treeScrollpane);
 		setUpTableDataTree.update();
 		// this is the beehive table
-		String[] BeehiveColName1 = { "Nameaa", "Size", "X", "Y", "Waiting Bees" };
+		String[] BeehiveColName1 = { "Namea", "Size", "X", "Y", "Waiting Bees" };
 		JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
 		SetUpTableData setUpTableDataBeehive = new SetUpTableData(beehiveTable,
 				world, "Beehives");
-		Thread p = new Thread(setUpTableDataBeehive);
+		Thread p = new Thread(setUpTableDataBeehive,"SetUpTableBeehive");
 		p.start();
 		JScrollPane beehiveScrollpane = new JScrollPane(beehiveTable);
 		add(beehiveScrollpane);
@@ -98,7 +108,7 @@ public class MyGui extends JPanel implements ActionListener{
 		// q.start();
 
 		JFreeChart chart = createChart(new CreateXYBlockData(world)
-		.createDataset());
+		.createDataset(this.world.getWidth(), this.world.getHeight()));
 		ChartPanel chartPanel = new ChartPanel(chart);
 
 		// ChartPanel blockrenderer = new createChart();
@@ -109,8 +119,10 @@ public class MyGui extends JPanel implements ActionListener{
 		JPanel control = new JPanel();
 
 		// change hunger settings
+		JPanel panelSliderHunger = new JPanel();
 		final JLabel sliderLabelHunger = new JLabel("Hunger: " + (int) (this.world.getHunger() * 10000));
-		JSlider sliderHunger = new JSlider (0,100,(int) (this.world.getHunger() * 10000));
+		sliderLabelHunger.setAlignmentY(LEFT_ALIGNMENT);
+		JSlider sliderHunger = new JSlider (0,200,(int) (this.world.getHunger() * 10000));
 		sliderHunger.setPaintTicks(true);
 		sliderHunger.setMajorTickSpacing( 25 );
 		sliderHunger.setMinorTickSpacing( 5 );
@@ -122,10 +134,13 @@ public class MyGui extends JPanel implements ActionListener{
 				sliderLabelHunger.setText("Hunger: " + (int) (MyGui.this.world.getHunger() * 10000));
 			}
 		} 				)				;
-
+		panelSliderHunger.add(sliderLabelHunger);
+		panelSliderHunger.add(sliderHunger);
 
 		// change size of beehives (only the first beehive at the moment)
+		JPanel panelSliderBeehiveSize = new JPanel();
 		final JLabel sliderLabelBeehiveSize = new JLabel("Max food of Beehive : " + (this.world.getBeehives().getFirst().getSize()));
+		sliderLabelBeehiveSize.setAlignmentX(LEFT_ALIGNMENT);
 		JSlider sliderBeehiveSize = new JSlider(0,5000, this.world.getBeehives().getFirst().getSize());
 		sliderBeehiveSize.setPaintTicks(true);
 		sliderBeehiveSize.setMajorTickSpacing( 1000 );
@@ -138,10 +153,67 @@ public class MyGui extends JPanel implements ActionListener{
 				sliderLabelBeehiveSize.setText("Max food of Beehive : " + (MyGui.this.world.getBeehives().getFirst().getSize()));
 			}
 		} 				)				;
+		panelSliderBeehiveSize.add(sliderLabelBeehiveSize);
+		panelSliderBeehiveSize.add(sliderBeehiveSize);
+
+		//JSlider for update speed
+		JPanel panelSliderUpdateSpeed = new JPanel();
+		final JLabel sliderLabelUpdateSpeed = new JLabel("Update Speed :" + (this.world.getUpdateSpeed()));
+		sliderLabelUpdateSpeed.setAlignmentX(LEFT_ALIGNMENT);
+		JSlider sliderUpdateSpeed = new JSlider(0,100,this.world.getUpdateSpeed());
+		sliderUpdateSpeed.setPaintTicks(true);
+		sliderUpdateSpeed.setMajorTickSpacing( 20 );
+		sliderUpdateSpeed.setMinorTickSpacing( 10 );
+		sliderUpdateSpeed.setPaintLabels(true);
+		sliderUpdateSpeed.addChangeListener( new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				MyGui.this.world.setUpdateSpeed(((JSlider)e.getSource()).getValue());
+				sliderLabelUpdateSpeed.setText("Update Speed : " + MyGui.this.world.getUpdateSpeed());
+			}
+		});
+		panelSliderUpdateSpeed.add(sliderLabelUpdateSpeed);
+		panelSliderUpdateSpeed.add(sliderUpdateSpeed);
+
+		//JSlider for world speed
+		JPanel panelSliderWorldSpeed = new JPanel();
+		final JLabel sliderLabelWorldSpeed = new JLabel("World Speed: " + (this.world.getWorldSpeed()));
+		sliderLabelWorldSpeed.setAlignmentX(LEFT_ALIGNMENT);
+		JSlider sliderWorldSpeed = new JSlider(1,200,this.world.getWorldSpeed());
+		sliderWorldSpeed.setPaintTicks(true);
+		sliderWorldSpeed.setMajorTickSpacing( 50 );
+		sliderWorldSpeed.setMinorTickSpacing( 25 );
+		sliderWorldSpeed.setPaintLabels(true);
+		sliderWorldSpeed.addChangeListener( new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				MyGui.this.world.setWorldSpeed(((JSlider)e.getSource()).getValue());
+				sliderLabelWorldSpeed.setText(("World Speed: " + (MyGui.this.world.getWorldSpeed())));
+			}
+		});
+		panelSliderWorldSpeed.add(sliderLabelWorldSpeed);
+		panelSliderWorldSpeed.add(sliderWorldSpeed);
+
+		//JSlider for bee count
+		JPanel panelSliderBeeCount = new JPanel();
+		final JLabel sliderLabelBeeCount = new JLabel("Bee Count: " + (this.world.getBeeCount()));
+		sliderLabelBeeCount.setAlignmentX(LEFT_ALIGNMENT);
+		JSlider sliderBeeCount= new JSlider(0,5000,this.world.getBeeCount());
+		sliderBeeCount.setPaintTicks(true);
+		sliderBeeCount.setMajorTickSpacing( 1000 );
+		sliderBeeCount.setMinorTickSpacing( 500 );
+		sliderBeeCount.setPaintLabels(true);
+		sliderBeeCount.addChangeListener( new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				MyGui.this.world.setBeeCount(((JSlider)e.getSource()).getValue());
+				sliderLabelBeeCount.setText(("Bee Count: " + (MyGui.this.world.getBeeCount())));
+			}
+		});
+		panelSliderBeeCount.add(sliderLabelBeeCount);
+		panelSliderBeeCount.add(sliderBeeCount);
+
 
 
 		// JSpinner for setting Trees number
-		SpinnerModel trees = new SpinnerNumberModel(10, //initial value
+		SpinnerModel trees = new SpinnerNumberModel(MyGui.this.world.getTreeNumber(), //initial value
 				0, //min
 				100, //max
 				1);   //step
@@ -149,28 +221,43 @@ public class MyGui extends JPanel implements ActionListener{
 				"Anzahl der Baeume",
 				trees);
 		treeSpinner.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner source = (JSpinner) e.getSource();
 				MyGui.this.world.setTreeNumber((int) source.getValue());
 				setUpTableDataTree.update();
-
 			}
 		});
-		
+
 		// This is the button to start the odel
 		JButton startBtn = new JButton("Start Model");
 		startBtn.setActionCommand("start");
 		startBtn.addActionListener(this);
-		
+
+		//This is the button to save the data
+		JButton saveGame = new JButton("Save Model");
+		saveGame.setActionCommand("save");
+		saveGame.addActionListener(this);
+
+		//This is the button to load data
+		JButton loadGame = new JButton("Load Model");
+		loadGame.setActionCommand("load");
+		loadGame.addActionListener(this);
+
+
+
+
+
 
 		// add all the sliders and labels
-		control.add(sliderLabelHunger);
-		control.add(sliderHunger);
-		control.add(sliderLabelBeehiveSize);
-		control.add(sliderBeehiveSize);
+		control.add(panelSliderHunger);
+		control.add(panelSliderBeehiveSize);
+		control.add(panelSliderUpdateSpeed);
+		control.add(panelSliderWorldSpeed);
+		control.add(panelSliderBeeCount);
 		control.add(startBtn);
+		control.add(saveGame);
+		control.add(loadGame);
 
 		add(control);
 
@@ -179,9 +266,8 @@ public class MyGui extends JPanel implements ActionListener{
 		repaint();
 
 		RefreshChart refresh = new RefreshChart(chart, chartPanel, world, frame);
-		Thread ref = new Thread(refresh);
+		Thread ref = new Thread(refresh,"refresh");
 		ref.start();
-
 	}
 
 
@@ -293,11 +379,48 @@ public class MyGui extends JPanel implements ActionListener{
 			source.setText("Stop Model");
 			source.setActionCommand("stop");
 		}
-		else {
+		else if ("stop".equals(source.getActionCommand())) {
 			this.world.stopModel();
 			source.setText("Start Model");
 			source.setActionCommand("start");
 		}
+		else if ("save".equals(source.getActionCommand())) {
+			// Dialog zum Speichern von Dateien anzeigen
+			JFileChooser chooser = new JFileChooser();
+			chooser.setSelectedFile(new File("data.dat"));
+			int buttonPressed = chooser.showSaveDialog(this);
+			if (buttonPressed == JFileChooser.APPROVE_OPTION) {
+			}
+
+			try { 
+				OutputStream os = new FileOutputStream(chooser.getSelectedFile());
+				ObjectOutputStream oos = new ObjectOutputStream(os);
+				oos.writeObject(world);
+				oos.close();
+			}	catch (IOException e1) {
+				System.out.println("Error " + e1);
+				e1.printStackTrace();
+			}
+		}
+
+		else if ("load".equals(source.getActionCommand())) {
+			JFileChooser chooser = new JFileChooser();
+			chooser.setSelectedFile(new File("data.dat"));
+			int buttonPressed = chooser.showOpenDialog(this);
+			if (buttonPressed == JFileChooser.APPROVE_OPTION) {
+				try {
+					InputStream is = new FileInputStream(chooser.getSelectedFile());
+					ObjectInputStream ois = new ObjectInputStream(is);
+					world = (World) ois.readObject();
+					ois.close();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		}
+
+
+
 	}
 
 }

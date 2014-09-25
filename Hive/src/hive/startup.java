@@ -25,12 +25,12 @@ public class startup {
 	public static void main(String[] args) {
 
 		hungry = 0.001; // How much food does each bee take at a time
-		numOfBees = 1000;
+		numOfBees = 2000;
 		numOfBeehives = 1;
 		worldX = 500;
 		worldY = 600;
 		numOfSources = 50;
-		numOfTrees = 10; // TODO: this as command line input.
+		numOfTrees = 50; // TODO: this as command line input.
 
 		// this will create the world
 		final World myWorld = new World(worldX, worldY, numOfBeehives,
@@ -42,7 +42,9 @@ public class startup {
 			// the beehive gets the number of bees to create in it, the number
 			// of this beehive (only for naming the object/thread, and the
 			// hunger of the bees
-			myWorld.createBeehive(numOfBees, i);
+			Thread b = new Thread(myWorld.createBeehive(numOfBees, i));
+			b.start();	
+			b.setName("Beehive i+1");
 			
 		}
 		myWorld.createBees(numOfBees);

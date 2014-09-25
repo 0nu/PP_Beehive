@@ -20,13 +20,27 @@ public class BeeSearch implements Runnable {
 					while (!this.beehive.world.isStartModel()) {
 						Thread.sleep(500);
 					}
-					Thread.sleep(1000); // 1000 milliseconds is one second.
+					Thread.sleep((int) Math.round( 1000 * getWaitTime())); // 1000 milliseconds is one second.
 				} catch (InterruptedException ex) {
 					Thread.currentThread().interrupt();
 				}
 			}
+			try {
+				Thread.sleep((int) Math.round( 1000 * getWaitTime())); // 1000 milliseconds is one second.
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
+
+	private double getWaitTime() {
+		// Returns WaitTime factor depending on worldSpeed
+		// init value is 40 
+		double factor = 20;
+		factor = factor / this.beehive.world.getWorldSpeed();
+		return factor;
+	}
+	
 	/**
 	 * @param args
 	 */

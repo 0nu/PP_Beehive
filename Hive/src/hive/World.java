@@ -1,5 +1,6 @@
 package hive;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.ArrayList;
@@ -16,14 +17,19 @@ import sources.Tree;
  * @author ole
  * 
  */
-public class World  {
+public class World  implements Serializable
+{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6425586782660600708L;
 	private int width;
 	private int height;
 	ArrayList<Integer> sourcesList;
 	public LinkedList<Tree> trees;
 	LinkedList<Beehive> Beehives;
-	DefaultTableModel tableModelBeehives;
-	private DefaultTableModel tableModelTrees;
+	transient DefaultTableModel tableModelBeehives;
+	private transient DefaultTableModel tableModelTrees;
 	private int numOfBeehives;
 	private int numOfThisBeehives;
 	private Source[][] sourcesMap;
@@ -31,6 +37,9 @@ public class World  {
 	private Random rand;
 	private LinkedList<Bee> bees;
 	private boolean startModel;
+	private int updateSpeed;
+	private int worldSpeed;
+	private int numOfBees;
 
 	/**
 	 * Creates the world.
@@ -61,6 +70,8 @@ public class World  {
 		this.hunger = hungry;
 		this.rand = new Random();
 		bees = new LinkedList<Bee>();
+		updateSpeed = 100;
+		worldSpeed = 80;
 	}
 
 	/**
@@ -86,6 +97,7 @@ public class World  {
 		// Beehive(this_is_x_position, this_is_y_position,
 		// numberOfBees, the_world,
 		// the_number_of_the_actual_beehive_to_Create, hunger_of_bees)
+		this.numOfBees = numberOfBees;
 		Beehive bh = new Beehive(rand.nextInt(width),
 				rand.nextInt(height), numberOfBees, this,
 				this.numOfThisBeehives, this.hunger);
@@ -195,12 +207,13 @@ public class World  {
 				xCheck = xIter+x;
 				yCheck = yIter+y;
 				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< this.getWidth()) && (yCheck < this.getHeight()) && (xCheck > 0) && (yCheck > 0)) {
-					this.sourcesMap[xCheck][yCheck] = source;     
+					this.sourcesMap[xCheck][yCheck] = source;
+					//System.out.println("Sx: " + x + " Source: " + source);
 				}
 			}
 		}
 	}
-	
+
 	private void removeFromSourceMap(int x, int y, int size, Source source) {
 		Integer radius = Integer.valueOf((int) Math.round(size/1000));
 
@@ -212,12 +225,12 @@ public class World  {
 				yCheck = yIter+y;
 				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< width) && (yCheck < height) && (xCheck > 0) && (yCheck > 0)) {
 					if (this.sourcesMap[xCheck][yCheck] == source) {
-					this.sourcesMap[xCheck][yCheck] = null;     
+						this.sourcesMap[xCheck][yCheck] = null;     
 					}
 				}
 			}
 		}
-		
+
 	}
 	public Source hitSource(int x, int y) {
 		return this.sourcesMap[x][y];
@@ -231,7 +244,7 @@ public class World  {
 	public void setHunger(int value) {
 		// This sets the hunger of the bees.
 		this.hunger = (double) value / 10000;
-		}
+	}
 
 	/**
 	 * @return the width
@@ -308,15 +321,15 @@ public class World  {
 		int diff = newCount - this.trees.size();
 		if (diff > 0) {
 			for (int i = 0; i < diff; i++) {
-			trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
-			int size = this.trees.size();
-			trees.getLast().setName("Tree " + (size));
-			
-			Thread t = new Thread(trees.getLast(), "Tree " + (size));
-			t.start();
-			trees.getLast().setPositionInTrees(size);
+				trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
+				int size = this.trees.size();
+				trees.getLast().setName("Tree " + (size));
+
+				Thread t = new Thread(trees.getLast(), "Tree " + (size));
+				t.start();
+				trees.getLast().setPositionInTrees(size);
 			}
-			
+
 		}
 		else if (diff < 0) {
 			for (int i = 0; i > diff; i--) {
@@ -332,14 +345,14 @@ public class World  {
 		// create all the bees and add each one to the list. start each bee with
 		// own thread.
 		for (int j = 0; j < numOfBeehives; j++)
-		for (int i = 0; i < numOfBees; i++) {
-			this.bees.add(new Bee(this, Beehives.get(j)));
-			Thread t = new Thread(this.bees.getLast(), "Bee " + i);
-			// Thread t = new Thread(bees.get(i), "Bee " + i);
-			//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
-			t.start();
+			for (int i = 0; i < numOfBees; i++) {
+				this.bees.add(new Bee(this, Beehives.get(j)));
+				Thread t = new Thread(this.bees.getLast(), "Bee " + i);
+				// Thread t = new Thread(bees.get(i), "Bee " + i);
+				//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
+				t.start();
 
-		}
+			}
 	}
 
 	/**
@@ -359,13 +372,13 @@ public class World  {
 	public void startModel() {
 		// Here the threads are started
 		startModel = true;
-		
+
 	}
 
 	public void stopModel() {
 		// This pauses the threads
 		startModel = false;
-		
+
 	}
 
 	/**
@@ -380,6 +393,67 @@ public class World  {
 	 */
 	public void setStartModel(boolean startModel) {
 		this.startModel = startModel;
+	}
+
+	public int getUpdateSpeed() {
+		// Returns the Update Speed
+		return updateSpeed;
+	}
+
+	public void setUpdateSpeed(int value) {
+		// Setter Method for Update Speed
+		updateSpeed = value;
+
+	}
+
+	public int getWorldSpeed() {
+		// Setter for worldSpeed
+		return worldSpeed;
+	}
+
+	public void setWorldSpeed(int value) {
+		// Setter for worldSpeed
+		worldSpeed = value;
+
+	}
+
+	public Number getTreeNumber() {
+		// TODO Auto-generated method stub
+		return trees.size();
+	}
+
+	public int getBeeCount() {
+		// getter for numOfBees
+		return this.numOfBees;
+	}
+
+	public void setBeeCount(int value) {
+		// Setter for numOfBees
+
+		int diff = value - this.bees.size();
+		if (diff > 0) {
+			for (int j = 0; j < numOfBeehives; j++)
+				for (int i = 0; i < diff; i++) {
+					synchronized (this.bees) {
+					this.bees.add(new Bee(this, Beehives.get(j)));
+					}
+					Thread t = new Thread(this.bees.getLast(), "Bee " + (i + this.numOfBees));
+					// Thread t = new Thread(bees.get(i), "Bee " + i);
+					//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
+					t.start();
+
+				}
+
+		}
+		else if (diff < 0) {
+			for (int i = 0; i > diff; i--) {
+				this.bees.getLast().setAlive(false);
+				synchronized (this.bees) {
+					this.bees.removeLast();
+				}
+			}
+		}
+		this.numOfBees = value;
 	}
 
 }
