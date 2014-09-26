@@ -239,7 +239,8 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface, Seriali
 			this.actualX = foundSource.x;
 			this.actualY = foundSource.y;
 			this.getStuff(foundSource, this);
-
+		} else if (getStatus().equals("arrived")) {
+			setStatus("searching");
 		}
 
 	}

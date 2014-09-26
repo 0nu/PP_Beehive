@@ -30,6 +30,7 @@ public class Beehive implements Runnable, Serializable
 	private String name;
 	int size;
 	public int IndexInBeehiveList;
+	private Boolean alive;
 
 	/**
 	 * Constructor method for beehive class.
@@ -48,28 +49,26 @@ public class Beehive implements Runnable, Serializable
 	 *            how much food does each bee take a time
 	 */
 
-	Beehive(int x, int y, int numOfBees, World world, int num, double hunger) {
+	Beehive(int x, int y, World world, int num, double hunger) {
 		positionX = x;
 		positionY = y;
-		this.numOfBees = numOfBees;
 		food = 1000;
 		this.world = world;
 		this.waitingQueue = new ArrayList<Bee>();
 		this.rand = new Random();
 		this.size = (int)food;
 		food = 880;
-
-
 		this.name = "Beehive " + num;
+		this.alive = true;
 	}
 
 	/**
 	 * run method. nothing happens here.
 	 */
 	public void run() {
-		while (true) {
+		while (this.alive) {
 			try {
-				while (!world.isStartModel()) {
+				while (!world.isStartModel() && (alive)) {
 					Thread.sleep(500);
 				}
 				//System.out.println(getWaitTime());
@@ -77,10 +76,17 @@ public class Beehive implements Runnable, Serializable
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
+			synchronized (this.alive) {
+				if (this.alive) {
+					eat();	
+					sendout();
 
-			eat();
-			sendout();
+				}
+
+			}
 		}
+
+
 	}
 
 	private void sendout() {
@@ -136,9 +142,10 @@ public class Beehive implements Runnable, Serializable
 			// pretty
 			// &
 			// fast
+
+
 			world.tableModelBeehives.setValueAt(Double.toString(this.food),
 					this.IndexInBeehiveList, 1); // TODO:
-
 		} else {
 			this.food= 0;
 			empty = 1;
@@ -307,4 +314,15 @@ public class Beehive implements Runnable, Serializable
 	public void setFood(double food) {
 		this.food = food;
 	}
+
+	public void setAlive(Boolean alive){
+		if (!alive) {
+			synchronized (this.alive) {
+				this.world.Beehives.remove(this);
+				this.world.setNumOfBeehives(this.world.getNumOfBeehives() - 1);
+			}
+			this.alive = alive;
+		}
+	}
+
 }

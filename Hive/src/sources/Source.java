@@ -19,7 +19,7 @@ public class Source extends Thread {
 	public String type;
 	private World world;
 	private int ListIndex;
-	private boolean alive;
+	protected boolean alive;
 	protected Random rand;
 	public int updateCount;
 
@@ -44,7 +44,7 @@ public class Source extends Thread {
 		// - position in world X & Y
 		//
 		this.world = world;
-		while (alive) {
+		while (this.alive) {
 			if (this.size < this.maxsize) {
 				this.size = this.size + this.recovery;
 				if (this.size > this.maxsize) {
@@ -54,7 +54,7 @@ public class Source extends Thread {
 
 
 			try {
-				while (!world.isStartModel()) {
+				while (!world.isStartModel() && this.alive) {
 					Thread.sleep(500);
 				}
 				Thread.sleep((int) Math.round(10000 * getWaitTime())); // 1000 milliseconds is one second.

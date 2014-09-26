@@ -47,16 +47,29 @@ public class RefreshChart implements Runnable {
 		int red = 0;
 		int green = 255;
 		int blue = 0;
-		double scaling = 10000 / 255;
-		double gradient = -10000;
+		double scaling = 6 / 255;
+		double gradient = 0;	
 
-		for (green = 255; green >= 0; green--) {
-			scale.add(gradient = gradient + scaling, new Color(red, green, blue));
-			red++;
+		for (int i = 0; i<10;i++) {
+			red = 0;
+			green = 255;
+			 blue = 0;
+			scaling = 1;
+			gradient = 0;
+			int factor = i * 20;
+			gradient = gradient - factor;
+			for (green = 255; green >= 0; green = (int)(green - 13)) {
+				scale.add(gradient = ((gradient - scaling)) , new Color(red, green, blue,red));
+				//System.out.println(gradient + " " + red);
+				red = red  + 13;
+			}
 		}
-
-		scale.add(-0.1, Color.red);
-		//scale.add(1.0, new Color(255,140,0));
+		scale.add(0.9, Color.red);
+		scale.add(1, new Color(255,255,0,0));
+		scale.add(2, new Color(255,255,0,0));
+		scale.add(3, new Color(255,255,0,0));
+		scale.add(5, new Color(255,255,0,0));
+		scale.add(9, new Color(255,255,0,10));
 		//scale.add(2.0, Color.black);
 
 		// and then we need colors for the bees
@@ -66,8 +79,8 @@ public class RefreshChart implements Runnable {
 		green = 255;
 		blue = 0;
 		scaling = 3000 / 255;
-		gradient = 0-scaling;
-		int alpha = 20;
+		gradient = 10-scaling;
+		int alpha = 25;
 
 		for (blue = 0; blue <= 255; blue++) {
 			scale.add(gradient  = gradient +  scaling, new Color(red, green, blue,alpha));

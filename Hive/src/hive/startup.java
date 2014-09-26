@@ -25,15 +25,15 @@ public class startup {
 	public static void main(String[] args) {
 
 		hungry = 0.001; // How much food does each bee take at a time
-		numOfBees = 2000;
+		numOfBees = 205;
 		numOfBeehives = 1;
 		worldX = 500;
 		worldY = 600;
 		numOfSources = 50;
-		numOfTrees = 50; // TODO: this as command line input.
+		numOfTrees = 5; // TODO: this as command line input.
 
 		// this will create the world
-		final World myWorld = new World(worldX, worldY, numOfBeehives,
+		final World myWorld = new World(worldX, worldY, numOfBees, numOfBeehives,
 				numOfSources, numOfTrees,hungry);
 		myWorld.createSources(numOfTrees);
 
@@ -42,12 +42,14 @@ public class startup {
 			// the beehive gets the number of bees to create in it, the number
 			// of this beehive (only for naming the object/thread, and the
 			// hunger of the bees
-			Thread b = new Thread(myWorld.createBeehive(numOfBees, i));
-			b.start();	
-			b.setName("Beehive i+1");
+			myWorld.createBeehive(i);
+
 			
 		}
+		myWorld.startSources();
+		myWorld.startBeehives();
 		myWorld.createBees(numOfBees);
+		myWorld.startBees();
 		
 		// following stuff is for the Gui
 		SwingUtilities.invokeLater(new Runnable() {

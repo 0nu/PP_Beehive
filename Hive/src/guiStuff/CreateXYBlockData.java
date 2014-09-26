@@ -8,6 +8,7 @@ import hive.Beehive;
 import hive.World;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -17,6 +18,7 @@ import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYZDataset;
 
 import sources.Source;
+import sources.Tree;
 
 public class CreateXYBlockData implements Runnable
 {
@@ -62,15 +64,17 @@ public class CreateXYBlockData implements Runnable
 		}
 
 		// this is for the Bees
-		final LinkedList<int[]> densityDataLL = new LinkedList<int[]>();
-		final LinkedList<int[]> densityDataSources = new LinkedList<int[]>();
-		int[][] densityData = new int[width][height];
+		final ArrayList<int[]> densityDataLL = new ArrayList<int[]>();
+		final ArrayList<int[]> densityDataSources = new ArrayList<int[]>();
+		//int[][] densityData = new int[width][height];
+		int[] densityData = new int[width*height];
 		int actX;
 		int actY;
 		int r;
 		int p;
 		int q;
 		Bee bee;
+		Tree tree;
 
 		// bees are round...
 		int radius = 4;
@@ -82,7 +86,7 @@ public class CreateXYBlockData implements Runnable
 			for (yIter = -radius; yIter <= radius; yIter++) {
 				if ( ((xIter * xIter) + (yIter * yIter)) <= (radius * radius)) {
 					square = Math.abs(xIter) + Math.abs(yIter);
-					for (int diff = 8; diff > square; diff--) {
+					for (r = 8; r > square; r--) {
 						radiusData[xIter+4][yIter+4] = radiusData[xIter+4][yIter+4] + 1;
 
 
@@ -95,28 +99,19 @@ public class CreateXYBlockData implements Runnable
 		//long startTimeNano = System.nanoTime();
 
 		for (Iterator<Beehive> i = this.world.getBeehives().iterator(); i.hasNext();) {
-		
-
-				LinkedList<Bee> bees = i.next().getBees();
-				synchronized (bees) {
+			LinkedList<Bee> bees = i.next().getBees();
+			synchronized (bees) {
 				// ... for every bee
-
-
-
 				for (Iterator<Bee> b = bees.iterator(); b.hasNext();) {
-
 					// ... +1 for the position -> two bees on same place -> 2
 					bee = b.next(); 
 					actX = bee.getActualX();
 					actY = bee.getActualY();
-
 					for ( r = 4; r >=0; r--) {
 						for ( p = actX - r;p <= actX+r;p++) {
 							for ( q = actY - r; q <= actY + r; q++) {
 								if ((p > 0) && (p < width) && (q > 0) && (q < height)) {
-									densityData[p][q] = densityData[p][q] + radiusData[p-actX+radius][q-actY+radius];
-
-									//}
+									densityData[q * width + p] = densityData[q * width + p] + radiusData[p-actX+radius][q-actY+radius];
 								}
 							}
 						}
@@ -125,33 +120,49 @@ public class CreateXYBlockData implements Runnable
 				}
 			} 
 		}
-		/*		long endTimeNano = System.nanoTime( );
-		System.out.println("create beeinfo   : " + (endTimeNano - startTimeNano));*/
+		/*
+		 * long endTimeNano = System.nanoTime( );
+		 * System.out.println("create beeinfo   : " + (endTimeNano - startTimeNano));
+		 */
 		// it's a big world, so lets reduce the data to places where at least
 		// one bee is
 
 		//startTimeNano = System.nanoTime( );
-
+//		LinkedList<Tree> trees = this.world.getTrees();
+//		for (Iterator<Tree> t = trees.iterator();t.hasNext();){
+//			tree = t.next();
+//			p = tree.x;
+//			q = tree.y;
+//			r = tree.maxsize;
+//			
+//		}
+		
+		
 		Source[][] sourcesMap = this.world.getSourcesMap();
-		for (int j = 0; j < width; j++) {
-			for (int k = 0; k < height; k++) {
-				if (densityData[j][k] != 0) {
-					densityDataLL.add(new int[] { j, k, densityData[j][k] });
+		for (p = 0; p < width; p++) {
+			for (q = 0; q < height; q++) {
+				/* if (densityData[j][k] != 0) {
+					densityDataLL.add(new int[] { p, k, densityData[p][k] });
 				}
-				if (sourcesMap[j][k] != null) {
-					densityDataSources.add(new int[] {j, k, (int) sourcesMap[j][k].size * (-1)});
+				 */
+				if ((densityData[q * width + p]) != 0 ) {
+					densityDataLL.add(new int[] {p, q, densityData[q * width + p]});
+				}
+				if (sourcesMap[p][q] != null) {
+					densityDataSources.add(new int[] {p, q, ((sourcesMap[p][q].quality -1 )*10 + (sourcesMap[p][q].size / 500)) *  (-1)});
+					//System.out.println("qual: " + sourcesMap[p][q].quality + ", size: " + sourcesMap[p][q].size + ", value: " + (((sourcesMap[p][q].quality -1 )*20 + (sourcesMap[p][q].size / 500)) *  (-1)));
 				}
 
 			}
 		}
 		/*endTimeNano = System.nanoTime( );
-
-		System.out.println("create sourcesmap: " + (endTimeNano - startTimeNano));*/
+		 System.out.println("create sourcesmap: " + (endTimeNano - startTimeNano));
+		 */
 
 		for (Beehive b: this.world.getBeehives()) {
-			for (int j = b.getPositionX() - 10; j < b.getPositionX() + 10; j++) {
-				for (int k = b.getPositionY() -10; k < b.getPositionY() + 10; k++) {
-					densityDataSources.add(new int[] {j, k, (int) (b.getFood() * (-1) * 10)});
+			for (p = b.getPositionX() - 10; p < b.getPositionX() + 10; p++) {
+				for (q = b.getPositionY() -10; q < b.getPositionY() + 10; q++) {
+					densityDataSources.add(new int[] {p, q,  ((int) b.getFood()) * (-1) * 10});
 				}
 			}
 		}
@@ -195,6 +206,15 @@ public class CreateXYBlockData implements Runnable
 			public double getYValue(int series, int item) {
 				//return world.Beehives.getFirst().bees.get(item).actualY;
 				if (series == 1) {
+					/*long yv;
+					long startTimeNano = System.nanoTime( );
+					yv = densityDataLL.get(item)[1];
+
+					long endTimeNano = System.nanoTime( );
+					System.out.println("lookup y   : " + (endTimeNano - startTimeNano));
+
+					return (endTimeNano - startTimeNano);
+					 */
 					return densityDataLL.get(item)[1];
 				} else {
 					return densityDataSources.get(item)[1];
