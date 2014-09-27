@@ -1,5 +1,6 @@
 package sources;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import hive.World;
@@ -9,7 +10,11 @@ import hive.World;
  * @author ole
  *
  */
-public class Source extends Thread {
+public class Source extends Thread implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4812401940274190773L;
 	public int x;
 	public int y;
 	public int quality;

@@ -28,7 +28,6 @@ public class Tree extends Source implements Serializable
 		this.recovery = this.rand.nextInt(100) + 1;
 		setAlive(true);
 		this.rand = new Random();
-		this.alive = alive;
 
 
 	}

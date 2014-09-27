@@ -39,8 +39,6 @@ public class Beehive implements Runnable, Serializable
 	 *            x-position of this beehive
 	 * @param y
 	 *            y-position of this beehive
-	 * @param numOfBees
-	 *            number of bees
 	 * @param world
 	 *            world-object
 	 * @param num
@@ -146,6 +144,7 @@ public class Beehive implements Runnable, Serializable
 
 			world.tableModelBeehives.setValueAt(Double.toString(this.food),
 					this.IndexInBeehiveList, 1); // TODO:
+		//	System.out.println(world + " " + world.tableModelBeehives);
 		} else {
 			this.food= 0;
 			empty = 1;

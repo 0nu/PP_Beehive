@@ -209,7 +209,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface, Seriali
 		do {
 
 			try {
-				while (!world.isStartModel()) {
+				while (!world.isStartModel() && this.alive) {
 					Thread.sleep(500);
 				}
 				Thread.sleep((int) Math.round(900 * getWaitTime())); // 1000 milliseconds is one second.
@@ -262,8 +262,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface, Seriali
 	 *            destination y-point
 	 * @param destination
 	 *            destination type {"home", "getFood",...}
-	 * @return bee object, probably not needed (?)
-	 */
+ */
 	private void flight(int destX, int destY, String destination) {
 
 		double diffX = destX - this.actualX;
@@ -289,7 +288,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface, Seriali
 			this.actualX = (int)flightX;
 			this.actualY = (int)flightY;
 			try {
-				while (!world.isStartModel()) {
+				while (!world.isStartModel() && this.alive) {
 					Thread.sleep(500);
 				}
 				Thread.sleep((int) Math.round(100 * getWaitTime())); // 1000 milliseconds is one second.
