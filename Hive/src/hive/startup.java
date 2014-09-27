@@ -20,7 +20,7 @@ public class startup {
 	static int worldX;
 	static int worldY;
 	static int numOfSources;
-	static int numOfTrees;
+	static int numOfTrees ;
 
 	public static void main(String[] args) {
 

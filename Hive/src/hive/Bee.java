@@ -108,7 +108,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface, Seriali
 							this.rand.nextInt(this.beehive.world.getWidth()),
 							this.rand.nextInt(this.beehive.world.getHeight()),
 							"searching");
-					/*if (this.getStatus() == "searching") {
+					/*if (this.getStatus()  == "searching") {
 						search();
 					}*/
 					break;
