@@ -25,6 +25,7 @@ public class RefreshChart implements Runnable {
 	private JFreeChart chart;
 	private World world;
 	public ChartPanel chartPanel;
+
 	public RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world,
 			JFrame frame) {
 		this.chart = chart;
@@ -33,7 +34,7 @@ public class RefreshChart implements Runnable {
 	}
 
 	/**
-	 * Run method. This is not coeded in a sophisticated way. Need to adjust
+	 * Run method. This is not coded in a sophisticated way. Need to adjust
 	 * refresh rate - or code it in a better way.
 	 */
 	@Override
@@ -48,33 +49,32 @@ public class RefreshChart implements Runnable {
 		int red = 0;
 		int green = 255;
 		int blue = 0;
-		double gradient = 0 ;	
+		double gradient = 0;
 		red = 255;
 		green = 0;
 		blue = 0;
 		int factor;
 		int j;
-		for (int i = 0; i<10;i++) {
+		for (int i = 0; i < 10; i++) {
 			gradient = 0;
 			factor = i * 20;
 			gradient = gradient - factor;
-			for (j = -1; j>=-20;j--){
-				scale.add(j-(i*20), new Color(red,green,blue,12*(-1)*j+15));
-//				System.out.println("num: " + (j-(i*20)) + ", red,green,blue,alpha: " +red + " " + green+ " "  + blue + " " + (12*(-1)*j+15));
-//				System.out.println("j,i,j*i: " + j + ", " + i + ", " + (j-(i*20)));
+			for (j = -1; j >= -20; j--) {
+				scale.add(j - (i * 20), new Color(red, green, blue, 12 * (-1)
+						* j + 15));
 			}
-			red = red-24;
+			red = red - 24;
 			green = green + 24;
 
 		}
-		
-//		some colors for the bees
+
+		// some colors for the bees
 		scale.add(0.9, Color.red);
-		scale.add(1, new Color(255,255,0,0));
-		scale.add(2, new Color(255,255,0,0));
-		scale.add(3, new Color(255,255,0,0));
-		scale.add(5, new Color(255,255,0,0));
-		scale.add(9, new Color(255,255,0,10));
+		scale.add(1, new Color(255, 255, 0, 0));
+		scale.add(2, new Color(255, 255, 0, 0));
+		scale.add(3, new Color(255, 255, 0, 0));
+		scale.add(5, new Color(255, 255, 0, 0));
+		scale.add(9, new Color(255, 255, 0, 10));
 
 		// and then we need more colors for many bees on one place
 		// yellow -> 1 bee
@@ -83,49 +83,41 @@ public class RefreshChart implements Runnable {
 		green = 255;
 		blue = 0;
 		double scaling = 3000 / 255;
-		gradient = 10-scaling;
+		gradient = 10 - scaling;
 		int alpha = 25;
 
 		for (blue = 0; blue <= 255; blue++) {
-			scale.add(gradient  = gradient +  scaling, new Color(red, green, blue,alpha));
+			scale.add(gradient = gradient + scaling, new Color(red, green,
+					blue, alpha));
 			if (alpha < 255) {
 				alpha++;
 			}
 		}
-				
-//		and now start the loop for updating the table
+
+		// and now start the loop for updating the table
 		int height = this.world.getHeight();
 		int width = this.world.getWidth();
 		while (true) {
 			if (!this.world.isStartModel()) {
-				try { Thread.sleep(500); // 1000 milliseconds is one second. }
+				try {
+					Thread.sleep(500); // 1000 milliseconds is one second. }
 				} catch (InterruptedException ex) {
-					Thread.currentThread().interrupt(); }
+					Thread.currentThread().interrupt();
+				}
 			}
-			//long startTimeNano = System.nanoTime( );
-			this.chart = createChart(new CreateXYBlockData(world).getDataset(width,height), scale);
-
-			/*
-			long endTimeNano = System.nanoTime( );
-			System.out.println("createChart: " + (endTimeNano - startTimeNano));
-			 */
-			//startTimeNano = System.nanoTime( );
-			//new ChartPanel(chart);
-			// this.chartPanel = chartPanel;
+			this.chart = createChart(
+					new CreateXYBlockData(world).getDataset(width, height),
+					scale);
 			this.chartPanel.setChart(this.chart);
-
-			//long startTimeNano = System.nanoTime( );
-			//this.chartPanel.updateUI();
-			/*long endTimeNano = System.nanoTime( );
-
-			System.out.println("updategui: " + (endTimeNano - startTimeNano));*/
-
 		}
 	}
 
 	/**
-	 * Creates a new chart. Is run to set the new dataset to the xyblockrenderer object.
-	 * @param dataset the dataset that was created just before
+	 * Creates a new chart. Is run to set the new dataset to the xyblockrenderer
+	 * object.
+	 * 
+	 * @param dataset
+	 *            the dataset that was created just before
 	 * @return the JFreeChart
 	 */
 	JFreeChart createChart(XYZDataset dataset, LookupPaintScale scale) {
@@ -144,8 +136,8 @@ public class RefreshChart implements Runnable {
 		yAxis.setTickLabelsVisible(false);
 		yAxis.setTickMarksVisible(false);
 		XYBlockRenderer renderer = new XYBlockRenderer();
-		//LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
-		//PaintScale scale = new GrayPaintScale(-10000, 100);
+		// LookupPaintScale scale = new LookupPaintScale(0, 500, Color.gray);
+		// PaintScale scale = new GrayPaintScale(-10000, 100);
 		renderer.setPaintScale(scale);
 		XYPlot plot = new XYPlot(dataset, xAxis, yAxis, renderer);
 		plot.setBackgroundPaint(Color.black);
@@ -160,6 +152,13 @@ public class RefreshChart implements Runnable {
 		return chart;
 
 	}
+
+	/**
+	 * @param world
+	 *            the world to which the chart belongs
+	 * @param chart
+	 *            the chart so set
+	 */
 	public void setChart(World world, JFreeChart chart) {
 		this.chartPanel.setChart(chart);
 		this.world = world;

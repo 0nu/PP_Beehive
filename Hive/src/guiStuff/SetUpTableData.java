@@ -1,6 +1,5 @@
 package guiStuff;
 
-
 import hive.World;
 
 import javax.swing.JTable;
@@ -11,6 +10,14 @@ public class SetUpTableData implements Runnable {
 	private JTable jTable;
 	private String tableTyp;
 
+	/**
+	 * @param jTable
+	 *            table to set up
+	 * @param world
+	 *            the world the table belongs to
+	 * @param string
+	 *            "Beehives" or "Trees"
+	 */
 	public SetUpTableData(JTable jTable, World world, String string) {
 		this.jTable = jTable;
 		this.world = world;
@@ -19,12 +26,13 @@ public class SetUpTableData implements Runnable {
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
 		update();
 	}
 
+	/**
+	 * This redraws the table completely.
+	 */
 	public void update() {
-		// TODO Auto-generated method stub
 		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
 		tableModel.setRowCount(0);
 		switch (tableTyp) {
@@ -43,30 +51,34 @@ public class SetUpTableData implements Runnable {
 
 				tableModel.addRow(data);
 			}
-			world.setTableModel(tableModel,tableTyp);
+			world.setTableModel(tableModel, tableTyp);
 			jTable.setModel(tableModel);
 
-			//tableModel.fireTableDataChanged();
+			// tableModel.fireTableDataChanged();
 		}
-		break;
+			break;
 		case "Beehives": {
-			// TODO: Add support for multiple beehives, this code works only with one!
-			for (int t = 0; t < this.world.getNumOfBeehives(); t++) {
+			// TODO: Add support for multiple beehives, this code works only
+			// with one!
+			for (int t = 0; t < this.world.getCountOfBeehives(); t++) {
 				String[] data = new String[5];
 				data[0] = this.world.getBeehives().get(t).getName();
-				data[1] = Double.toString(this.world.getBeehives().get(t).getFood());
-				data[2] = Integer.toString(this.world.getBeehives().get(t).getPositionX());
-				data[3] = Integer.toString(this.world.getBeehives().get(t).getPositionY());
-				data[4] = Integer.toString(this.world.getBeehives().get(t).waitingQueueSize());
+				data[1] = Double.toString(this.world.getBeehives().get(t)
+						.getFood());
+				data[2] = Integer.toString(this.world.getBeehives().get(t)
+						.getPositionX());
+				data[3] = Integer.toString(this.world.getBeehives().get(t)
+						.getPositionY());
+				data[4] = Integer.toString(this.world.getBeehives().get(t)
+						.waitingQueueSize());
 
 				tableModel.addRow(data);
 			}
 			world.setTableModel(tableModel, tableTyp);
 			jTable.setModel(tableModel);
-			//tableModel.fireTableDataChanged();
+			// tableModel.fireTableDataChanged();
 		}
-		break;
+			break;
 		}
 	}
 }
-

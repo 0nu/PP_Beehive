@@ -16,7 +16,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import javax.imageio.stream.FileImageInputStream;
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -42,12 +41,14 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.data.xy.XYZDataset;
+
 /**
  * This builds the gui.
+ * 
  * @author ole
- *
+ * 
  */
-public class MyGui extends JPanel implements ActionListener{
+public class MyGui extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	World world;
 	private JTable jTableTrees;
@@ -68,13 +69,15 @@ public class MyGui extends JPanel implements ActionListener{
 	private ChartPanel chartPanel;
 	private RefreshChart refresh;
 	private JButton stopBtn;
+
 	/**
-	 * Constructor. At the moment it creates 3 panels: 
-	 * - Table for sources
-	 * - Table for beehives
-	 * - Graphic panel for objects in the world.
-	 * @param world the world
-	 * @param frame the frame to draw into
+	 * Constructor. At the moment it creates 3 panels: - Table for sources -
+	 * Table for beehives - Graphic panel for objects in the world.
+	 * 
+	 * @param world
+	 *            the world
+	 * @param frame
+	 *            the frame to draw into
 	 */
 	public MyGui(World world, JFrame frame) {
 		this.world = world;
@@ -82,8 +85,7 @@ public class MyGui extends JPanel implements ActionListener{
 		String[] treeColName = { "Name", "Size", "Max Size", "Quality",
 				"Refresh", "Type", "X", "Y" };
 		JTable treeTable = getJTable(treeColName, jTableTrees);
-		setUpTableDataTree = new SetUpTableData(treeTable,
-				world, "Trees");
+		setUpTableDataTree = new SetUpTableData(treeTable, world, "Trees");
 		treeScrollpane = new JScrollPane();
 		treeScrollpane.getViewport().add(treeTable);
 		add(treeScrollpane);
@@ -92,8 +94,8 @@ public class MyGui extends JPanel implements ActionListener{
 		// this is the beehive table
 		String[] BeehiveColName1 = { "Name", "Size", "X", "Y", "Waiting Bees" };
 		JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
-		setUpTableDataBeehive = new SetUpTableData(beehiveTable,
-				world, "Beehives");
+		setUpTableDataBeehive = new SetUpTableData(beehiveTable, world,
+				"Beehives");
 		beehiveScrollpane = new JScrollPane();
 		beehiveScrollpane.getViewport().add(beehiveTable);
 		add(beehiveScrollpane);
@@ -104,14 +106,13 @@ public class MyGui extends JPanel implements ActionListener{
 		// Thread q = new Thread(blockData);
 		// q.start();
 
-		chart = createChart(new CreateXYBlockData(this.world)
-		.createDataset(this.world.getWidth(), this.world.getHeight()));
+		chart = createChart(new CreateXYBlockData(this.world).createDataset(
+				this.world.getWidth(), this.world.getHeight()));
 		chartPanel = new ChartPanel(null);
 		chartPanel.setChart(chart);
 
 		// ChartPanel blockrenderer = new createChart();
 		add(chartPanel);
-
 
 		// this is for the control stuff
 		JPanel control = new JPanel();
@@ -120,104 +121,120 @@ public class MyGui extends JPanel implements ActionListener{
 		JPanel panelSliderHunger = new JPanel();
 		final JLabel sliderLabelHunger = new JLabel("Hunger: " + getHunger());
 		sliderLabelHunger.setAlignmentY(LEFT_ALIGNMENT);
-		sliderHunger = new JSlider (0,200, getHunger());
+		sliderHunger = new JSlider(0, 200, getHunger());
 		sliderHunger.setPaintTicks(true);
-		sliderHunger.setMajorTickSpacing( 25 );
-		sliderHunger.setMinorTickSpacing( 5 );
+		sliderHunger.setMajorTickSpacing(25);
+		sliderHunger.setMinorTickSpacing(5);
 		sliderHunger.setPaintLabels(true);
-		sliderHunger.addChangeListener( new ChangeListener() 
-		{
-			public void stateChanged( ChangeEvent e ) {
-				MyGui.this.world.setHunger( ((JSlider)e.getSource()).getValue() );
-				sliderLabelHunger.setText("Hunger: " + (int) (MyGui.this.world.getHunger() * 10000));
+		sliderHunger.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				MyGui.this.world.setHunger(((JSlider) e.getSource()).getValue());
+				sliderLabelHunger.setText("Hunger: "
+						+ (int) (MyGui.this.world.getHunger() * 10000));
 			}
-		} 				)				;
+		});
 		panelSliderHunger.add(sliderLabelHunger);
 		panelSliderHunger.add(sliderHunger);
 
 		// change size of beehives (only the first beehive at the moment)
 		JPanel panelSliderBeehiveSize = new JPanel();
-		final JLabel sliderLabelBeehiveSize = new JLabel("Max food of Beehive : " + (this.world.getBeehives().getFirst().getSize()));
+		final JLabel sliderLabelBeehiveSize = new JLabel(
+				"Max food of Beehive : "
+						+ (this.world.getBeehives().getFirst().getSize()));
 		sliderLabelBeehiveSize.setAlignmentX(LEFT_ALIGNMENT);
-		sliderBeehiveSize = new JSlider(0,5000, this.world.getBeehives().getFirst().getSize());
+		sliderBeehiveSize = new JSlider(0, 5000, this.world.getBeehives()
+				.getFirst().getSize());
 		sliderBeehiveSize.setPaintTicks(true);
-		sliderBeehiveSize.setMajorTickSpacing( 1000 );
-		sliderBeehiveSize.setMinorTickSpacing( 500 );
+		sliderBeehiveSize.setMajorTickSpacing(1000);
+		sliderBeehiveSize.setMinorTickSpacing(500);
 		sliderBeehiveSize.setPaintLabels(true);
-		sliderBeehiveSize.addChangeListener( new ChangeListener() 
-		{
-			public void stateChanged( ChangeEvent e ) {
-				MyGui.this.world.getBeehives().getFirst().setSize( ((JSlider)e.getSource()).getValue() );
-				sliderLabelBeehiveSize.setText("Max food of Beehive : " + (MyGui.this.world.getBeehives().getFirst().getSize()));
+		sliderBeehiveSize.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				MyGui.this.world.getBeehives().getFirst()
+						.setSize(((JSlider) e.getSource()).getValue());
+				sliderLabelBeehiveSize.setText("Max food of Beehive : "
+						+ (MyGui.this.world.getBeehives().getFirst().getSize()));
 			}
-		} 				)				;
+		});
 		panelSliderBeehiveSize.add(sliderLabelBeehiveSize);
 		panelSliderBeehiveSize.add(sliderBeehiveSize);
 
-		//JSlider for update speed
+		// JSlider for update speed
 		JPanel panelSliderUpdateSpeed = new JPanel();
-		final JLabel sliderLabelUpdateSpeed = new JLabel("Update Speed :" + (this.world.getUpdateSpeed()));
+		final JLabel sliderLabelUpdateSpeed = new JLabel("Update Speed :"
+				+ (this.world.getUpdateSpeed()));
 		sliderLabelUpdateSpeed.setAlignmentX(LEFT_ALIGNMENT);
-		sliderUpdateSpeed = new JSlider(0,100,this.world.getUpdateSpeed());
+		sliderUpdateSpeed = new JSlider(0, 100, this.world.getUpdateSpeed());
 		sliderUpdateSpeed.setPaintTicks(true);
-		sliderUpdateSpeed.setMajorTickSpacing( 20 );
-		sliderUpdateSpeed.setMinorTickSpacing( 10 );
+		sliderUpdateSpeed.setMajorTickSpacing(20);
+		sliderUpdateSpeed.setMinorTickSpacing(10);
 		sliderUpdateSpeed.setPaintLabels(true);
-		sliderUpdateSpeed.addChangeListener( new ChangeListener() {
+		sliderUpdateSpeed.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				MyGui.this.world.setUpdateSpeed(((JSlider)e.getSource()).getValue());
-				sliderLabelUpdateSpeed.setText("Update Speed : " + MyGui.this.world.getUpdateSpeed());
+				MyGui.this.world.setUpdateSpeed(((JSlider) e.getSource())
+						.getValue());
+				sliderLabelUpdateSpeed.setText("Update Speed : "
+						+ MyGui.this.world.getUpdateSpeed());
 			}
 		});
 		panelSliderUpdateSpeed.add(sliderLabelUpdateSpeed);
 		panelSliderUpdateSpeed.add(sliderUpdateSpeed);
 
-		//JSlider for world speed
+		// JSlider for world speed
 		JPanel panelSliderWorldSpeed = new JPanel();
-		final JLabel sliderLabelWorldSpeed = new JLabel("World Speed: " + (this.world.getWorldSpeed()));
+		final JLabel sliderLabelWorldSpeed = new JLabel("World Speed: "
+				+ (this.world.getWorldSpeed()));
 		sliderLabelWorldSpeed.setAlignmentX(LEFT_ALIGNMENT);
-		sliderWorldSpeed = new JSlider(1,200,this.world.getWorldSpeed());
+		sliderWorldSpeed = new JSlider(1, 200, this.world.getWorldSpeed());
 		sliderWorldSpeed.setPaintTicks(true);
-		sliderWorldSpeed.setMajorTickSpacing( 50 );
-		sliderWorldSpeed.setMinorTickSpacing( 25 );
+		sliderWorldSpeed.setMajorTickSpacing(50);
+		sliderWorldSpeed.setMinorTickSpacing(25);
 		sliderWorldSpeed.setPaintLabels(true);
-		sliderWorldSpeed.addChangeListener( new ChangeListener() {
+		sliderWorldSpeed.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				MyGui.this.world.setWorldSpeed(((JSlider)e.getSource()).getValue());
-				sliderLabelWorldSpeed.setText(("World Speed: " + (MyGui.this.world.getWorldSpeed())));
+				MyGui.this.world.setWorldSpeed(((JSlider) e.getSource())
+						.getValue());
+				sliderLabelWorldSpeed
+						.setText(("World Speed: " + (MyGui.this.world
+								.getWorldSpeed())));
 			}
 		});
 		panelSliderWorldSpeed.add(sliderLabelWorldSpeed);
 		panelSliderWorldSpeed.add(sliderWorldSpeed);
 
-		//JSlider for bee count
+		// JSlider for bee count
 		JPanel panelSliderBeeCount = new JPanel();
-		final JLabel sliderLabelBeeCount = new JLabel("Bee Count: " + (this.world.getBeeCount()));
+		final JLabel sliderLabelBeeCount = new JLabel("Bee Count: "
+				+ (this.world.getBeeCount()));
 		sliderLabelBeeCount.setAlignmentX(LEFT_ALIGNMENT);
-		sliderBeeCount= new JSlider(0,5000,this.world.getBeeCount());
+		sliderBeeCount = new JSlider(0, 5000, this.world.getBeeCount());
 		sliderBeeCount.setPaintTicks(true);
-		sliderBeeCount.setMajorTickSpacing( 1000 );
-		sliderBeeCount.setMinorTickSpacing( 500 );
+		sliderBeeCount.setMajorTickSpacing(1000);
+		sliderBeeCount.setMinorTickSpacing(500);
 		sliderBeeCount.setPaintLabels(true);
-		sliderBeeCount.addChangeListener( new ChangeListener() {
+		sliderBeeCount.addChangeListener(new ChangeListener() {
+			@Override
 			public void stateChanged(ChangeEvent e) {
-				MyGui.this.world.setBeeCount(((JSlider)e.getSource()).getValue());
-				sliderLabelBeeCount.setText(("Bee Count: " + (MyGui.this.world.getBeeCount())));
+				MyGui.this.world.setBeeCount(((JSlider) e.getSource())
+						.getValue());
+				sliderLabelBeeCount.setText(("Bee Count: " + (MyGui.this.world
+						.getBeeCount())));
 			}
 		});
 		panelSliderBeeCount.add(sliderLabelBeeCount);
 		panelSliderBeeCount.add(sliderBeeCount);
 
-
-
 		// JSpinner for setting Trees number
-		SpinnerModel trees = new SpinnerNumberModel(MyGui.this.world.getTreeCount(), //initial value
-				0, //min
-				100, //max
-				1);   //step
-		treeSpinner = addLabeledSpinner(control,
-				"Anzahl der Baeume",
-				trees);
+		SpinnerModel trees = new SpinnerNumberModel(
+				MyGui.this.world.getTreeCount(), // initial value
+				0, // min
+				100, // max
+				1); // step
+		treeSpinner = addLabeledSpinner(control, "Anzahl der Baeume", trees);
 		treeSpinner.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -232,25 +249,20 @@ public class MyGui extends JPanel implements ActionListener{
 		startBtn.setActionCommand("start");
 		startBtn.addActionListener(this);
 
-		//This is the button to save the data
+		// This is the button to save the data
 		saveGame = new JButton("Save Model");
 		saveGame.setActionCommand("save");
 		saveGame.addActionListener(this);
 
-		//This is the button to load data
+		// This is the button to load data
 		JButton loadGame = new JButton("Load Model");
 		loadGame.setActionCommand("load");
 		loadGame.addActionListener(this);
 
-		//This is for stopping all the threads
+		// This is for stopping all the threads
 		stopBtn = new JButton("Kill Threads");
 		stopBtn.setActionCommand("kill");
 		stopBtn.addActionListener(this);
-
-
-
-
-
 
 		// add all the sliders and labels
 		control.add(panelSliderHunger);
@@ -263,8 +275,6 @@ public class MyGui extends JPanel implements ActionListener{
 		control.add(saveGame);
 		control.add(loadGame);
 
-
-
 		add(control);
 
 		setLayout(new GridLayout(2, 2));
@@ -272,14 +282,12 @@ public class MyGui extends JPanel implements ActionListener{
 		repaint();
 
 		refresh = new RefreshChart(chart, chartPanel, this.world, frame);
-		Thread ref = new Thread(refresh,"refresh");
+		Thread ref = new Thread(refresh, "refresh");
 		ref.start();
 
 	}
 
-
-	static protected JSpinner addLabeledSpinner(Container c,
-			String label,
+	static protected JSpinner addLabeledSpinner(Container c, String label,
 			SpinnerModel model) {
 		JLabel l = new JLabel(label);
 		c.add(l);
@@ -311,8 +319,8 @@ public class MyGui extends JPanel implements ActionListener{
 		yAxis.setUpperMargin(0.0);
 		yAxis.setRange(0, world.getHeight());
 		XYBlockRenderer renderer = new XYBlockRenderer();
-		//LookupPaintScale scale = new LookupPaintScale(0, 500,     Color.gray);
-		//PaintScale scale = new GrayPaintScale(-10000, 100);
+		// LookupPaintScale scale = new LookupPaintScale(0, 500, Color.gray);
+		// PaintScale scale = new GrayPaintScale(-10000, 100);
 		LookupPaintScale scale = new LookupPaintScale(0.5D, 4.5D, Color.blue);
 		scale.add(-10000.0, Color.blue);
 		scale.add(0.0, Color.red);
@@ -330,29 +338,12 @@ public class MyGui extends JPanel implements ActionListener{
 	}
 
 	/**
-	 * not used anymore, is it?
-	 * @param world the world it's all about
-	 */
-	public void createAndShowGUI(World world) {
-		// Create and set up the window.
-		// JFrame frame = new JFrame("MyGui");
-		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		// Create and set up the content pane.
-
-		// MyGui newContentPane = new MyGui(world,frame);
-		// newContentPane.setOpaque(true); // content panes must be opaque
-		// frame.setContentPane(newContentPane);
-		//
-		// // Display the window.
-		// frame.pack();
-		// frame.setVisible(true);
-	}
-
-	/**
 	 * Creates or sets the actual tablemodel for the table.
-	 * @param colName strings[] of the column names
-	 * @param jTable a jTable
+	 * 
+	 * @param colName
+	 *            strings[] of the column names
+	 * @param jTable
+	 *            a jTable
 	 * @return the jTable
 	 */
 	private JTable getJTable(String[] colName, JTable jTable) {
@@ -364,6 +355,7 @@ public class MyGui extends JPanel implements ActionListener{
 				 */
 				private static final long serialVersionUID = 1L;
 
+				@Override
 				public boolean isCellEditable(int nRow, int nCol) {
 					return false;
 				}
@@ -376,19 +368,18 @@ public class MyGui extends JPanel implements ActionListener{
 		return jTable;
 	}
 
-
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		// TODO Auto-generated method stub
-		JButton source = (JButton) e.getSource(); 
+		JButton source = (JButton) e.getSource();
 		switch (source.getActionCommand()) {
-		case "start" : 
+		case "start":
 			this.world.startModel();
 			source.setText("Pause Model");
 			source.setActionCommand("pause");
 			break;
 
-		case "pause" :
+		case "pause":
 			this.world.stopModel();
 			source.setText("Start Model");
 			source.setActionCommand("start");
@@ -403,12 +394,13 @@ public class MyGui extends JPanel implements ActionListener{
 			int buttonPressed = chooser.showSaveDialog(this);
 			if (buttonPressed == JFileChooser.APPROVE_OPTION) {
 
-				try { 
-					OutputStream os = new FileOutputStream(chooser.getSelectedFile());
+				try {
+					OutputStream os = new FileOutputStream(
+							chooser.getSelectedFile());
 					ObjectOutputStream oos = new ObjectOutputStream(os);
 					oos.writeObject(world);
 					oos.close();
-				}	catch (IOException e1) {
+				} catch (IOException e1) {
 					System.out.println("Error " + e1);
 					e1.printStackTrace();
 				}
@@ -428,12 +420,14 @@ public class MyGui extends JPanel implements ActionListener{
 				startBtn.setActionCommand("start");
 				World world_new = null;
 				try {
-					InputStream is = new FileInputStream(chooser2.getSelectedFile());
+					InputStream is = new FileInputStream(
+							chooser2.getSelectedFile());
 					ObjectInputStream ois = new ObjectInputStream(is);
 					world_new = (World) ois.readObject();
 					ois.close();
 				} catch (Exception e1) {
-					JOptionPane.showMessageDialog(null, e1.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(null, e1.getMessage(),
+							"Error", JOptionPane.ERROR_MESSAGE);
 					failure = true;
 				}
 
@@ -442,31 +436,34 @@ public class MyGui extends JPanel implements ActionListener{
 					MyGui.this.world.setBeeCount(0);
 					setUpTableDataTree.update();
 					if (MyGui.this.world.getBeehives().size() != 0) {
-						MyGui.this.world.getBeehives().getFirst().setAlive(false);
-						}			
+						MyGui.this.world.getBeehives().getFirst()
+								.setAlive(false);
+					}
 					setUpTableDataBeehive.update();
 					world = world_new;
-					//				change beehive table to actual one
-					String[] BeehiveColName1 = { "Name", "Size", "X", "Y", "Waiting Bees" };
-					JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
+					// change beehive table to actual one
+					String[] BeehiveColName1 = { "Name", "Size", "X", "Y",
+							"Waiting Bees" };
+					JTable beehiveTable = getJTable(BeehiveColName1,
+							jTableBeehives);
 					setUpTableDataBeehive = new SetUpTableData(beehiveTable,
 							world, "Beehives");
 					beehiveScrollpane.setViewportView(beehiveTable);
 					setUpTableDataBeehive.update();
 
 					// this is the Tree table
-					String[] treeColName = { "Name", "Size", "Max Size", "Quality",
-							"Refresh", "Type", "X", "Y" };
+					String[] treeColName = { "Name", "Size", "Max Size",
+							"Quality", "Refresh", "Type", "X", "Y" };
 					JTable treeTable = getJTable(treeColName, jTableTrees);
-					setUpTableDataTree = new SetUpTableData(treeTable,
-							world, "Trees");
-					//JScrollPane treeScrollpane = new JScrollPane();
+					setUpTableDataTree = new SetUpTableData(treeTable, world,
+							"Trees");
+					// JScrollPane treeScrollpane = new JScrollPane();
 					treeScrollpane.setViewportView(treeTable);
-					//add(treeScrollpane);
-
+					// add(treeScrollpane);
 
 					chart = createChart(new CreateXYBlockData(this.world)
-					.createDataset(this.world.getWidth(), this.world.getHeight()));
+							.createDataset(this.world.getWidth(),
+									this.world.getHeight()));
 					chartPanel.setChart(chart);
 					refresh.setChart(world, chart);
 
@@ -477,7 +474,8 @@ public class MyGui extends JPanel implements ActionListener{
 					sliderBeeCount.setEnabled(true);
 					sliderBeeCount.setValue(this.world.getBeeCount());
 					sliderBeehiveSize.setEnabled(true);
-					sliderBeehiveSize.setValue(this.world.getBeehives().getFirst().getSize());
+					sliderBeehiveSize.setValue(this.world.getBeehives()
+							.getFirst().getSize());
 					sliderHunger.setEnabled(true);
 					sliderHunger.setValue(getHunger());
 					sliderUpdateSpeed.setEnabled(true);
@@ -501,7 +499,7 @@ public class MyGui extends JPanel implements ActionListener{
 			setUpTableDataTree.update();
 
 			if (MyGui.this.world.getBeehives() != null) {
-			MyGui.this.world.getBeehives().getFirst().setAlive(false);
+				MyGui.this.world.getBeehives().getFirst().setAlive(false);
 			}
 			setUpTableDataBeehive.update();
 
@@ -547,16 +545,10 @@ public class MyGui extends JPanel implements ActionListener{
 
 			source.setText("Kill Model");
 			source.setActionCommand("kill");
-
 		}
-
-
-
 	}
 
-
 	private int getHunger() {
-		// TODO Auto-generated method stub
 		return (int) (this.world.getHunger() * 10000);
 	}
 

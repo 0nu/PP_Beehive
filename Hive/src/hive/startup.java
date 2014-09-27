@@ -9,8 +9,7 @@ import javax.swing.SwingUtilities;
  * This is the starting point of the Bee-Project.
  * 
  * @author ole
- * rgfscacsdfecdas
- * yyyxxysxsax
+ * 
  */
 public class startup {
 
@@ -20,7 +19,7 @@ public class startup {
 	static int worldX;
 	static int worldY;
 	static int numOfSources;
-	static int numOfTrees ;
+	static int numOfTrees;
 
 	public static void main(String[] args) {
 
@@ -33,8 +32,8 @@ public class startup {
 		numOfTrees = 5; // TODO: this as command line input.
 
 		// this will create the world
-		final World myWorld = new World(worldX, worldY, numOfBees, numOfBeehives,
-				numOfSources, numOfTrees,hungry);
+		final World myWorld = new World(worldX, worldY, numOfBees,
+				numOfBeehives, numOfSources, numOfTrees, hungry);
 		myWorld.createSources(numOfTrees);
 
 		// create the beehives and bees
@@ -44,15 +43,15 @@ public class startup {
 			// hunger of the bees
 			myWorld.createBeehive(i);
 
-			
 		}
 		myWorld.startSources();
 		myWorld.startBeehives();
 		myWorld.createBees(numOfBees);
 		myWorld.startBees();
-		
+
 		// following stuff is for the Gui
 		SwingUtilities.invokeLater(new Runnable() {
+			@Override
 			public void run() {
 				JFrame frame = new JFrame("MyGui");
 				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

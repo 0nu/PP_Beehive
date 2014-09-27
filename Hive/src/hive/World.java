@@ -17,29 +17,25 @@ import sources.Tree;
  * @author ole
  * 
  */
-public class World  implements Serializable
-{
-	/**
-	 * 
-	 */
+public class World implements Serializable {
 	private static final long serialVersionUID = 6425586782660600708L;
-	private int width;
-	private int height;
-	ArrayList<Integer> sourcesList;
-	public LinkedList<Tree> trees;
 	LinkedList<Beehive> Beehives;
+	private LinkedList<Bee> bees;
+	private int height;
+	private double hunger;
+	private int countOfBeehives;
+	private int numOfBees;
+	private int numOfThisBeehives;
+	private Random rand;
+	ArrayList<Integer> sourcesList;
+	private Source[][] sourcesMap;
+	private boolean startModel;
 	transient DefaultTableModel tableModelBeehives;
 	private transient DefaultTableModel tableModelTrees;
-	private int numOfBeehives;
-	private int numOfThisBeehives;
-	private Source[][] sourcesMap;
-	private double hunger;
-	private Random rand;
-	private LinkedList<Bee> bees;
-	private boolean startModel;
+	public LinkedList<Tree> trees;
 	private int updateSpeed;
+	private int width;
 	private int worldSpeed;
-	private int numOfBees;
 
 	/**
 	 * Creates the world.
@@ -54,17 +50,15 @@ public class World  implements Serializable
 	 *            x-dimension of this world
 	 * @param height
 	 *            y-dimension of this world
-	 * @param hungry 
+	 * @param hungry
 	 */
-
-	// constructor
-	World(int width, int height, int numOfBees, int numOfBeehives, int numOfSources,
-			int numOfTrees, double hungry) {
+	World(int width, int height, int numOfBees, int numOfBeehives,
+			int numOfSources, int numOfTrees, double hungry) {
 		startModel = false;
 		this.setWidth(width);
 		this.setHeight(height);
 		this.Beehives = new LinkedList<Beehive>();
-		this.numOfBeehives = numOfBeehives;
+		this.countOfBeehives = numOfBeehives;
 		Source[][] sourcesMap = new Source[this.getWidth()][this.getHeight()];
 		this.sourcesMap = sourcesMap;
 		this.hunger = hungry;
@@ -74,11 +68,6 @@ public class World  implements Serializable
 		worldSpeed = 80;
 		this.numOfBees = numOfBees;
 	}
-
-	/**
-	 * On .start() a println is given out.
-	 */
-
 
 	/**
 	 * Adds beehive to beehive list.
@@ -92,22 +81,38 @@ public class World  implements Serializable
 		bh.setIndexInBeehiveList(this.Beehives.indexOf(bh));
 	}
 
+	/**
+	 * Adds given Source to the sourcemap.
+	 * 
+	 * @param x
+	 *            x-Value
+	 * @param y
+	 *            y-Value
+	 * @param size
+	 *            MaxSize of Source
+	 * @param source
+	 *            which Source to add
+	 */
 	public void addToSourceMap(int x, int y, int size, Source source) {
-		Integer radius = Integer.valueOf((int) Math.round(size/1000));
+		Integer radius = Integer.valueOf(Math.round(size / 1000));
 
 		int xCheck = 0;
 		int yCheck = 0;
 		for (int yIter = -radius; yIter <= radius; yIter++) {
 			for (int xIter = -radius; xIter <= radius; xIter++) {
-				xCheck = xIter+x;
-				yCheck = yIter+y;
-				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< this.getWidth()) && (yCheck < this.getHeight()) && (xCheck > 0) && (yCheck > 0)) {
+				xCheck = xIter + x;
+				yCheck = yIter + y;
+				if (((xIter * xIter) + (yIter * yIter) <= (radius * radius))
+						&& (xCheck < this.getWidth())
+						&& (yCheck < this.getHeight()) && (xCheck > 0)
+						&& (yCheck > 0)) {
 					this.sourcesMap[xCheck][yCheck] = source;
-					//System.out.println("Sx: " + x + " Source: " + source);
+					// System.out.println("Sx: " + x + " Source: " + source);
 				}
 			}
 		}
 	}
+
 	/**
 	 * Creates the beehive(s), one per time. Adds the created beehive to the
 	 * list.
@@ -118,27 +123,22 @@ public class World  implements Serializable
 	 */
 	public Beehive createBeehive(int numOfThisBeehive) {
 
-
 		// Beehive(this_is_x_position, this_is_y_position,
 		// numberOfBees, the_world,
 		// the_number_of_the_actual_beehive_to_Create, hunger_of_bees)
-		Beehive bh = new Beehive(rand.nextInt(width),
-				rand.nextInt(height), this,
-				this.numOfThisBeehives, this.hunger);
+		Beehive bh = new Beehive(rand.nextInt(width), rand.nextInt(height),
+				this, this.numOfThisBeehives, this.hunger);
 
 		addBeeHiveToList(bh);
 		return bh;
 	}
 
-
 	public void createBees(int numOfBees) {
 		// create all the bees and add each one to the list. start each bee with
 		// own thread.
-		for (int j = 0; j < numOfBeehives; j++)
+		for (int j = 0; j < countOfBeehives; j++)
 			for (int i = 0; i < numOfBees; i++) {
 				this.bees.add(new Bee(this, Beehives.get(j)));
-
-
 			}
 	}
 
@@ -157,16 +157,20 @@ public class World  implements Serializable
 		trees = new LinkedList<Tree>();
 
 		// now create trees with the positions saved in _scourcesList_
-		for (int i = 1; i <= numOfSources; i++) { 
+		for (int i = 1; i <= numOfSources; i++) {
 
 			trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
 			trees.getLast().setName("Tree " + i);
-			trees.getLast().setPositionInTrees(trees.size()-1);
-
+			trees.getLast().setPositionInTrees(trees.size() - 1);
 		}
 		return trees;
 	}
-	
+
+	/**
+	 * Returns the count of the bees.
+	 * 
+	 * @return the count of bees.
+	 */
 	public int getBeeCount() {
 		// getter for numOfBees
 		return this.numOfBees;
@@ -196,25 +200,36 @@ public class World  implements Serializable
 		return height;
 	}
 
+	/**
+	 * Returns the hunger of the bees
+	 * 
+	 * @return hunger of the bees
+	 */
 	public double getHunger() {
-		// TODO Auto-generated method stub
 		return this.hunger;
 	}
+
 	/**
+	 * Returns count of Beehives
+	 * 
 	 * @return the numOfBeehives
 	 */
-	public int getNumOfBeehives() {
-		return this.numOfBeehives;
+	public int getCountOfBeehives() {
+		return this.countOfBeehives;
 	}
 
 	/**
 	 * Helper function for getting random positions in world for sources and
 	 * beehive.
 	 * 
-	 * @param maxX in most times x-size of the world
-	 * @param maxY in most times y-size of the world
-	 * @param count number of xy-pairs to create
-	 * @param array not really needed, is it?
+	 * @param maxX
+	 *            in most times x-size of the world
+	 * @param maxY
+	 *            in most times y-size of the world
+	 * @param count
+	 *            number of xy-pairs to create
+	 * @param array
+	 *            not really needed, is it?
 	 * @return array of all xy-pairs
 	 */
 	//
@@ -226,10 +241,8 @@ public class World  implements Serializable
 		for (int j = 0; j < count + 1; j++) {
 			array.add(rand.nextInt(maxX));
 			array.add(rand.nextInt(maxY));
-
 		}
 		return array;
-
 	}
 
 	/**
@@ -246,56 +259,92 @@ public class World  implements Serializable
 		return tableModelTrees;
 	}
 
+	/**
+	 * @return count of trees in this world
+	 */
 	public Number getTreeCount() {
 		// TODO Auto-generated method stub
 		return trees.size();
 	}
 
+	/**
+	 * @return LinkedList of trees of this world
+	 */
 	public LinkedList<Tree> getTrees() {
 		// TODO Auto-generated method stub
 		return trees;
 	}
 
+	/**
+	 * @return updateSpeed of model
+	 */
 	public int getUpdateSpeed() {
 		// Returns the Update Speed
 		return updateSpeed;
 	}
 
 	/**
-	 * @return the width
+	 * @return width of the world
 	 */
 	public int getWidth() {
 		return width;
 	}
 
+	/**
+	 * Setter for worldSpeed
+	 * 
+	 * @return world Speed
+	 */
 	public int getWorldSpeed() {
-		// Setter for worldSpeed
 		return worldSpeed;
 	}
 
+	/**
+	 * This gives back source in x-y of null if there's none
+	 * 
+	 * @param x
+	 *            x-Value to look for
+	 * @param y
+	 *            y-Value to look for
+	 * @return Source if there's one, null otherwise
+	 */
 	public Source hitSource(int x, int y) {
 		return this.sourcesMap[x][y];
 	}
 
 	/**
-	 * @return the startModel
+	 * @return is model active?
 	 */
 	public boolean isStartModel() {
 		return startModel;
 	}
 
+	/**
+	 * This methods removes sources from the sources map
+	 * 
+	 * @param x
+	 *            x-value
+	 * @param y
+	 *            y-value
+	 * @param size
+	 *            size of source that will be removed
+	 * @param source
+	 *            source to remove
+	 */
 	public void removeFromSourceMap(int x, int y, int size, Source source) {
-		Integer radius = Integer.valueOf((int) Math.round(size/1000));
+		Integer radius = Integer.valueOf(Math.round(size / 1000));
 
 		int xCheck = 0;
 		int yCheck = 0;
 		for (int yIter = -radius; yIter <= radius; yIter++) {
 			for (int xIter = -radius; xIter <= radius; xIter++) {
-				xCheck = xIter+x;
-				yCheck = yIter+y;
-				if ( ((xIter * xIter) + (yIter * yIter) <= (radius * radius)) && (xCheck< width) && (yCheck < height) && (xCheck > 0) && (yCheck > 0)) {
+				xCheck = xIter + x;
+				yCheck = yIter + y;
+				if (((xIter * xIter) + (yIter * yIter) <= (radius * radius))
+						&& (xCheck < width) && (yCheck < height)
+						&& (xCheck > 0) && (yCheck > 0)) {
 					if (this.sourcesMap[xCheck][yCheck] == source) {
-						this.sourcesMap[xCheck][yCheck] = null;     
+						this.sourcesMap[xCheck][yCheck] = null;
 					}
 				}
 			}
@@ -303,25 +352,24 @@ public class World  implements Serializable
 
 	}
 
+	/**
+	 * @param value
+	 *            the new value for the bee count
+	 */
 	public void setBeeCount(int value) {
-		// Setter for numOfBees
-
 		int diff = value - this.bees.size();
 		if (diff > 0) {
-			for (int j = 0; j < numOfBeehives; j++)
+			for (int j = 0; j < countOfBeehives; j++)
 				for (int i = 0; i < diff; i++) {
 					synchronized (this.bees) {
 						this.bees.add(new Bee(this, Beehives.get(j)));
 					}
-					Thread t = new Thread(this.bees.getLast(), "Bee " + (i + this.numOfBees));
-					// Thread t = new Thread(bees.get(i), "Bee " + i);
-					//Thread t = new Thread(new GoSearching(bees.get(i)), "Bee " + i);
+					Thread t = new Thread(this.bees.getLast(), "Bee "
+							+ (i + this.numOfBees));
 					t.start();
-
 				}
 
-		}
-		else if (diff < 0) {
+		} else if (diff < 0) {
 			for (int i = 0; i > diff; i--) {
 				this.bees.getLast().setAlive(false);
 				synchronized (this.bees) {
@@ -333,39 +381,49 @@ public class World  implements Serializable
 	}
 
 	/**
-	 * @param bees the bees to set
+	 * @param bees
+	 *            the bees to set
 	 */
 	public void setBees(LinkedList<Bee> bees) {
 		this.bees = bees;
 	}
 
 	/**
-	 * @param height the height to set
+	 * @param height
+	 *            the height to set
 	 */
 	public void setHeight(int height) {
 		this.height = height;
 	}
 
-	public void setHunger(int value) {
-		// This sets the hunger of the bees.
-		this.hunger = (double) value / 10000;
-	}
 	/**
-	 * @param numOfBeehives the numOfBeehives to set
+	 * @param hunger
+	 *            the hunger to set
 	 */
-	public void setNumOfBeehives(int numOfBeehives) {
-		this.numOfBeehives = numOfBeehives;
+	public void setHunger(int hunger) {
+		// This sets the hunger of the bees.
+		this.hunger = (double) hunger / 10000;
 	}
 
 	/**
-	 * @param sourcesMap the sourcesMap to set
+	 * @param countOfBeehives
+	 *            the countOfBeehives to set
+	 */
+	public void setNumOfBeehives(int countOfBeehives) {
+		this.countOfBeehives = countOfBeehives;
+	}
+
+	/**
+	 * @param sourcesMap
+	 *            the sourcesMap to set
 	 */
 	public void setSourcesMap(Source[][] sourcesMap) {
 		this.sourcesMap = sourcesMap;
 	}
 
 	/**
-	 * @param startModel the startModel to set
+	 * @param startModel
+	 *            the startModel to set
 	 */
 	public void setStartModel(boolean startModel) {
 		this.startModel = startModel;
@@ -373,8 +431,11 @@ public class World  implements Serializable
 
 	/**
 	 * Setter method for the tableModels for the Gui.
-	 * @param tableModel the table model to add to the world
-	 * @param string only "Beehives" or "Trees" (at this moment)
+	 * 
+	 * @param tableModel
+	 *            the table model to add to the world
+	 * @param string
+	 *            only "Beehives" or "Trees" (at this moment)
 	 */
 	public void setTableModel(DefaultTableModel tableModel, String string) {
 
@@ -389,28 +450,33 @@ public class World  implements Serializable
 	}
 
 	/**
-	 * @param tableModelTrees the tableModelTrees to set
+	 * @param tableModelTrees
+	 *            the tableModelTrees to set
 	 */
 	public void setTableModelTrees(DefaultTableModel tableModelTrees) {
 		this.tableModelTrees = tableModelTrees;
 	}
 
+	/**
+	 * @param newCount
+	 *            the new tree count to set
+	 */
 	public void setTreeCount(int newCount) {
 		// This changes number of Trees
 		int diff = newCount - this.trees.size();
 		if (diff > 0) {
 			for (int i = 0; i < diff; i++) {
-				trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
+				trees.add(new Tree(rand.nextInt(width), rand.nextInt(height),
+						this));
 				int size = this.trees.size();
 				trees.getLast().setName("Tree " + (size));
 
 				Thread t = new Thread(trees.getLast(), "Tree " + (size));
 				t.start();
-				trees.getLast().setPositionInTrees(size-1);
+				trees.getLast().setPositionInTrees(size - 1);
 			}
 
-		}
-		else if (diff < 0) {
+		} else if (diff < 0) {
 			for (int i = 0; i > diff; i--) {
 				Tree t = trees.getLast();
 				this.removeFromSourceMap(t.x, t.y, t.maxsize, t);
@@ -420,34 +486,49 @@ public class World  implements Serializable
 		}
 	}
 
-	public void setUpdateSpeed(int value) {
+	/**
+	 * @param newUpdateSpeed
+	 *            the new update speed to set
+	 */
+	public void setUpdateSpeed(int newUpdateSpeed) {
 		// Setter Method for Update Speed
-		updateSpeed = value;
+		updateSpeed = newUpdateSpeed;
 
 	}
 
 	/**
-	 * @param width the width to set
+	 * @param width
+	 *            the width to set
 	 */
 	public void setWidth(int width) {
 		this.width = width;
 	}
 
-	public void setWorldSpeed(int value) {
+	/**
+	 * @param newWorldSpeed
+	 *            the new world speed to set
+	 */
+	public void setWorldSpeed(int newWorldSpeed) {
 		// Setter for worldSpeed
-		worldSpeed = value;
+		worldSpeed = newWorldSpeed;
 
 	}
 
+	/**
+	 * Starts the threads for the beehives.
+	 */
 	public void startBeehives() {
 		// this creates the threads and starts them for the beehives
-		for (int i = 0; i < this.Beehives.size();i++) {
+		for (int i = 0; i < this.Beehives.size(); i++) {
 			Thread p = new Thread(this.Beehives.get(i));
 			p.start();
-			p.setName("Beehive " + i+1);
+			p.setName("Beehive " + i + 1);
 		}
 	}
 
+	/**
+	 * Starts threads for bees.
+	 */
 	public void startBees() {
 		for (int i = 0; i < this.bees.size(); i++) {
 			Thread t = new Thread(this.bees.get(i), "Bee " + i);
@@ -456,22 +537,31 @@ public class World  implements Serializable
 
 	}
 
+	/**
+	 * Sets startModel = true.
+	 */
 	public void startModel() {
 		// Here the threads are started
 		startModel = true;
 
 	}
 
+	/**
+	 * Starts threads for the sources.
+	 */
 	public void startSources() {
 		for (int i = 0; i < this.trees.size(); i++) {
-			Thread t = new Thread(trees.get(i), "Tree " + i+1);
+			Thread t = new Thread(trees.get(i), "Tree " + i + 1);
 			trees.get(i).setAlive(true);
 			trees.get(i).setName("Tree " + i);
 			t.start();
-			trees.getLast().setPositionInTrees(i+1);
+			trees.getLast().setPositionInTrees(i + 1);
 		}
 	}
 
+	/**
+	 * Stops model.
+	 */
 	public void stopModel() {
 		// This pauses the threads
 		startModel = false;
