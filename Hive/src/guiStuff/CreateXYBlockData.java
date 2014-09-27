@@ -149,7 +149,7 @@ public class CreateXYBlockData implements Runnable
 					densityDataLL.add(new int[] {p, q, densityData[q * width + p]});
 				}
 				if (sourcesMap[p][q] != null) {
-					densityDataSources.add(new int[] {p, q, ((sourcesMap[p][q].quality -1 )*10 + (sourcesMap[p][q].size / 500)) *  (-1)});
+					densityDataSources.add(new int[] {p, q, Math.round(((sourcesMap[p][q].quality -1 )*20 + (sourcesMap[p][q].size / 500)) *  (-1) )});
 					//System.out.println("qual: " + sourcesMap[p][q].quality + ", size: " + sourcesMap[p][q].size + ", value: " + (((sourcesMap[p][q].quality -1 )*20 + (sourcesMap[p][q].size / 500)) *  (-1)));
 				}
 
@@ -162,7 +162,8 @@ public class CreateXYBlockData implements Runnable
 		for (Beehive b: this.world.getBeehives()) {
 			for (p = b.getPositionX() - 10; p < b.getPositionX() + 10; p++) {
 				for (q = b.getPositionY() -10; q < b.getPositionY() + 10; q++) {
-					densityDataSources.add(new int[] {p, q,  ((int) b.getFood()) * (-1) * 10});
+					densityDataSources.add(new int[] {p, q, ( (int)(b.getFood() / (b.getSize() +1) * (-10)) *20)});
+					//System.out.println(( (int)(b.getFood() / (b.getSize() +1) * (-10)) *20));
 				}
 			}
 		}

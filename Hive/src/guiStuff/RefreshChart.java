@@ -49,21 +49,41 @@ public class RefreshChart implements Runnable {
 		int blue = 0;
 		double scaling = 6 / 255;
 		double gradient = 0;	
-
+		red = 255;
+		green = 0;
+		blue = 0;
 		for (int i = 0; i<10;i++) {
-			red = 0;
-			green = 255;
-			 blue = 0;
+
 			scaling = 1;
 			gradient = 0;
 			int factor = i * 20;
 			gradient = gradient - factor;
-			for (green = 255; green >= 0; green = (int)(green - 13)) {
-				scale.add(gradient = ((gradient - scaling)) , new Color(red, green, blue,red));
-				//System.out.println(gradient + " " + red);
-				red = red  + 13;
+			
+			for (int j = -1; j>=-20;j--){
+				scale.add(j-(i*20), new Color(red,green,blue,12*(-1)*j+15));
+				System.out.println("num: " + (j-(i*20)) + ", red,green,blue,alpha: " +red + " " + green+ " "  + blue + " " + (12*(-1)*j+15));
+				System.out.println("j,i,j*i: " + j + ", " + i + ", " + (j-(i*20)));
 			}
+			red = red-24;
+			green = green + 24;
+			System.out.println(", r,g: "  + red + ", " + green);
+			
+			/*
+			for (red = 255; red >= 0; red = (int)(red - 13)) {
+				scale.add(gradient = ((gradient - scaling)) , new Color(red, green, blue,green));
+				System.out.println("num: " + gradient + ", red,green,blue,alpha: " +red + " " + green+ " "  + blue + " " + red);
+				green = green + 13;
+			}
+			*/
 		}
+		System.out.println(scale.getPaint(-140));
+		System.out.println(scale.getPaint(-120));
+		System.out.println(scale.getPaint(-100));
+		System.out.println(scale.getPaint(-80));
+		System.out.println(scale.getPaint(-60));
+		System.out.println(scale.getPaint(-40));
+		System.out.println(scale.getPaint(-20));
+		System.out.println("-----------_____");
 		scale.add(0.9, Color.red);
 		scale.add(1, new Color(255,255,0,0));
 		scale.add(2, new Color(255,255,0,0));
@@ -88,6 +108,13 @@ public class RefreshChart implements Runnable {
 				alpha++;
 			}
 		}
+		System.out.println(scale.getPaint(-140));
+		System.out.println(scale.getPaint(-120));
+		System.out.println(scale.getPaint(-100));
+		System.out.println(scale.getPaint(-80));
+		System.out.println(scale.getPaint(-60));
+		System.out.println(scale.getPaint(-40));
+		System.out.println(scale.getPaint(-20));
 		int height = this.world.getHeight();
 		int width = this.world.getWidth();
 		while (true) {

@@ -22,6 +22,8 @@ public class Source extends Thread {
 	protected boolean alive;
 	protected Random rand;
 	public int updateCount;
+	int foodreturn;
+
 
 	/**
 	 * run method, nothing here.
@@ -77,7 +79,6 @@ public class Source extends Thread {
 	 * @return foodreturn == 1 if source != empty
 	 */
 	public int getFood() {
-		int foodreturn;
 		if (this.size >= 1) {
 			foodreturn = 1;
 			synchronized (this) {
@@ -86,7 +87,7 @@ public class Source extends Thread {
 				}
 			}
 			this.updateCount++;
-			if ((world.getTableModelTrees() != null) && (this.updateCount > ((world.getUpdateSpeed() -100) * (-1))) && world.getUpdateSpeed() != 0) {
+			if ((world.getTableModelTrees() != null) && (this.updateCount > (world.getUpdateSpeed() -100) * (-1)) && world.getUpdateSpeed() != 0) {
 				this.updateCount = 0;
 				try {
 					world.getTableModelTrees().setValueAt(
