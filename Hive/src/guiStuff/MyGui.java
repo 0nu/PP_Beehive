@@ -121,10 +121,10 @@ public class MyGui extends JPanel implements ActionListener {
 		JPanel panelSliderHunger = new JPanel();
 		final JLabel sliderLabelHunger = new JLabel("Hunger: " + getHunger());
 		sliderLabelHunger.setAlignmentY(LEFT_ALIGNMENT);
-		sliderHunger = new JSlider(0, 200, getHunger());
+		sliderHunger = new JSlider(0, 400, getHunger());
 		sliderHunger.setPaintTicks(true);
-		sliderHunger.setMajorTickSpacing(25);
-		sliderHunger.setMinorTickSpacing(5);
+		sliderHunger.setMajorTickSpacing(100);
+		sliderHunger.setMinorTickSpacing(50);
 		sliderHunger.setPaintLabels(true);
 		sliderHunger.addChangeListener(new ChangeListener() {
 			@Override

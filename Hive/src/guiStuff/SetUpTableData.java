@@ -5,6 +5,12 @@ import hive.World;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * This sets up the table data for the different tables. 
+ * 
+ * @author ole
+ *
+ */
 public class SetUpTableData implements Runnable {
 	private World world;
 	private JTable jTable;

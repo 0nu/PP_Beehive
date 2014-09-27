@@ -1,8 +1,5 @@
 package guiStuff;
 
-/**
- * This can create a dataset for the xyblockrenderer.
- */
 import hive.Bee;
 import hive.Beehive;
 import hive.World;
@@ -19,6 +16,12 @@ import org.jfree.data.xy.XYZDataset;
 import sources.Source;
 import sources.Tree;
 
+/**
+ * This sets up the xy blockrenderer, all the colors for the colorscale, etc.
+ * 
+ * @author ole
+ *
+ */
 public class CreateXYBlockData implements Runnable {
 	/**
 	 * 

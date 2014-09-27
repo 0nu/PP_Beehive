@@ -1,5 +1,6 @@
 package hive;
 
+
 import guiStuff.MyGui;
 
 import javax.swing.JFrame;
@@ -26,7 +27,7 @@ public class startup {
 		hungry = 0.001; // How much food does each bee take at a time
 		numOfBees = 205;
 		numOfBeehives = 1;
-		worldX = 500;
+		worldX = 1000;
 		worldY = 600;
 		numOfSources = 50;
 		numOfTrees = 5; // TODO: this as command line input.

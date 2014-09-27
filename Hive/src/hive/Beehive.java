@@ -12,18 +12,9 @@ import java.util.ArrayList;
  * @author ole
  * 
  */
-/**
- * @author ole
- *
- */
-/**
- * @author ole
- * 
- */
+
 public class Beehive implements Runnable, Serializable {
-	/**
-	 * 
-	 */
+
 	private static final long serialVersionUID = -5404284857273245055L;
 	private Boolean alive;
 	private double food;
@@ -38,20 +29,6 @@ public class Beehive implements Runnable, Serializable {
 	private ArrayList<Bee> waitingQueue;
 	World world;
 
-	/**
-	 * Constructor method for beehive class.
-	 * 
-	 * @param x
-	 *            x-position of this beehive
-	 * @param y
-	 *            y-position of this beehive
-	 * @param world
-	 *            world-object
-	 * @param num
-	 *            the number of this beehive in the world
-	 * @param hunger
-	 *            how much food does each bee take a time
-	 */
 
 	/**
 	 * @param x
