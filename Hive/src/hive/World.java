@@ -52,7 +52,7 @@ public class World implements Serializable {
 	 *            y-dimension of this world
 	 * @param hungry
 	 */
-	World(int width, int height, int numOfBees, int numOfBeehives,
+	public World(int width, int height, int numOfBees, int numOfBeehives,
 			int numOfSources, int numOfTrees, double hungry) {
 		startModel = false;
 		this.setWidth(width);

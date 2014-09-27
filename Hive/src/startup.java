@@ -1,7 +1,8 @@
-package hive;
+
 
 
 import guiStuff.MyGui;
+import hive.World;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
