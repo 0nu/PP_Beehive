@@ -16,8 +16,8 @@ public class Source extends Thread implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -4812401940274190773L;
-	protected boolean alive;
-	int foodreturn;
+	private boolean alive;
+	private int foodreturn;
 	private int ListIndex;
 	public int maxsize;
 	public int quality;
@@ -25,7 +25,7 @@ public class Source extends Thread implements Serializable {
 	public int recovery;
 	public int size;
 	public String type;
-	public int updateCount;
+	private int updateCount;
 	private World world;
 	public int x;
 	public int y;
@@ -49,6 +49,7 @@ public class Source extends Thread implements Serializable {
 					this.size--;
 				}
 			}
+			
 			this.updateCount++;
 			if ((world.getTableModelTrees() != null)
 					&& (this.updateCount > (world.getUpdateSpeed() - 100)
@@ -81,7 +82,7 @@ public class Source extends Thread implements Serializable {
 	 * @param world
 	 *            the world we live in
 	 */
-	public void grow(World world) {
+	void grow(World world) {
 		// this is the superclass for all the possible types of foodstuff
 		// what information does it need?
 		// - position in world X & Y

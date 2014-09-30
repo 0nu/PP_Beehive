@@ -1,7 +1,6 @@
 package hive;
 
 import java.io.Serializable;
-import java.util.Random;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
@@ -13,19 +12,16 @@ import java.util.ArrayList;
  * 
  */
 
-public class Beehive implements Runnable, Serializable {
+public class Beehive implements Runnable, Serializable, BeeInterface {
 
 	private static final long serialVersionUID = -5404284857273245055L;
 	private Boolean alive;
 	private double food;
-	public int IndexInBeehiveList;
+	int IndexInBeehiveList;
 	private String name;
-	int numOfBees;
 	private int positionX;
 	private int positionY;
-	private Random rand;
-	boolean sendout;
-	int size;
+	private int size;
 	private ArrayList<Bee> waitingQueue;
 	World world;
 
@@ -48,7 +44,6 @@ public class Beehive implements Runnable, Serializable {
 		food = 1000;
 		this.world = world;
 		this.waitingQueue = new ArrayList<Bee>();
-		this.rand = new Random();
 		this.size = (int) food;
 		food = 880;
 		this.name = "Beehive " + num;
@@ -60,7 +55,7 @@ public class Beehive implements Runnable, Serializable {
 	 * 
 	 * @return empty == 1 if beehive is empty, otherweise empty == 0
 	 */
-	public synchronized int eat() {
+	synchronized int eat() {
 		int empty;
 		if (this.food >= (this.world.getHunger() * this.getWaitingQueueSize())) {
 			this.food = this.food
@@ -279,6 +274,7 @@ public class Beehive implements Runnable, Serializable {
 	 * @param beeToAdd
 	 *            the bee to add to the waiting queue
 	 */
+	@Override
 	public void waitingQueueAdd(Bee beeToAdd) {
 		// adds bee to waitingQueue
 		synchronized (waitingQueue) {
@@ -291,7 +287,7 @@ public class Beehive implements Runnable, Serializable {
 	 * @param beeToRemove
 	 *            the bee to remove from waiting queue
 	 */
-	public void waitingQueueRemove(Bee beeToRemove) {
+	void waitingQueueRemove(Bee beeToRemove) {
 		// removes bee from waiting queue
 		synchronized (waitingQueue) {
 			waitingQueue.remove(beeToRemove);
@@ -305,7 +301,7 @@ public class Beehive implements Runnable, Serializable {
 	 * @param position
 	 *            the position of the bee to change to status
 	 */
-	public void waitingQueueSetStatus(String status, int position) {
+	private void waitingQueueSetStatus(String status, int position) {
 		// sets status at given position of waitingQueue
 		synchronized (waitingQueue) {
 			if (waitingQueue.size() != 0) {
@@ -332,7 +328,7 @@ public class Beehive implements Runnable, Serializable {
 	 * @return count bees or less it waiting queue doesn't have that much bees
 	 *         in it
 	 */
-	public ArrayList<Bee> waitingQueueSublist(int count) {
+	ArrayList<Bee> waitingQueueSublist(int count) {
 		// returns sublist of waiting queue and removes the returned bees
 		ArrayList<Bee> beeSublist;
 		synchronized (waitingQueue) {

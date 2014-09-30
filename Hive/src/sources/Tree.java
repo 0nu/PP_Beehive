@@ -26,7 +26,6 @@ public class Tree extends Source implements Serializable {
 		this.x = x;
 		this.y = y;
 		this.world = world;
-		this.updateCount = updateCount;
 		this.quality = this.rand.nextInt(9) + 1;
 		this.size = this.rand.nextInt(10000);
 		maxsize = this.size;

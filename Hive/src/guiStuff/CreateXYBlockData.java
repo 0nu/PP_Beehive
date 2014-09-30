@@ -14,7 +14,6 @@ import org.jfree.data.general.DatasetGroup;
 import org.jfree.data.xy.XYZDataset;
 
 import sources.Source;
-import sources.Tree;
 
 /**
  * This sets up the xy blockrenderer, all the colors for the colorscale, etc.
@@ -22,7 +21,7 @@ import sources.Tree;
  * @author ole
  *
  */
-public class CreateXYBlockData implements Runnable {
+class CreateXYBlockData implements Runnable {
 	/**
 	 * 
 	 */
@@ -32,7 +31,7 @@ public class CreateXYBlockData implements Runnable {
 	 * @param world
 	 *            the world the data is to be taken from
 	 */
-	public CreateXYBlockData(World world) {
+	CreateXYBlockData(World world) {
 		this.world = world;
 	}
 
@@ -44,7 +43,7 @@ public class CreateXYBlockData implements Runnable {
 	 * 
 	 * @return the dataset. Ever used? Don't know.
 	 */
-	public XYZDataset getDataset(int width, int height) {
+	XYZDataset getDataset(int width, int height) {
 		return createDataset(width, height);
 	}
 
@@ -58,7 +57,7 @@ public class CreateXYBlockData implements Runnable {
 	 * 
 	 * @return the dataset.
 	 */
-	public XYZDataset createDataset(int width, int height) {
+	XYZDataset createDataset(int width, int height) {
 
 		// TODO: without sleeping wait for creation of .bees
 		try {
@@ -86,8 +85,6 @@ public class CreateXYBlockData implements Runnable {
 		int p;
 		int q;
 		Bee bee;
-		Tree tree;
-
 		// bees are round...
 		int radius = 4;
 		int[][] radiusData = new int[9][9];
@@ -258,7 +255,7 @@ public class CreateXYBlockData implements Runnable {
 			}
 
 			@Override
-			public Comparable getSeriesKey(int series) {
+			public Comparable<String> getSeriesKey(int series) {
 				return "sin(sqrt(x + y))";
 			}
 

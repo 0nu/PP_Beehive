@@ -3,6 +3,8 @@ package guiStuff;
 import hive.World;
 
 import java.awt.Color;
+import java.awt.Insets;
+import java.awt.Stroke;
 
 import javax.swing.JFrame;
 
@@ -13,6 +15,7 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.data.xy.XYZDataset;
+import org.jfree.ui.RectangleInsets;
 
 /**
  * This refreshes the xyblockrenderer Chart from time to time.
@@ -20,13 +23,13 @@ import org.jfree.data.xy.XYZDataset;
  * @author ole
  * 
  */
-public class RefreshChart implements Runnable {
+class RefreshChart implements Runnable {
 
 	private JFreeChart chart;
 	private World world;
-	public ChartPanel chartPanel;
+	private ChartPanel chartPanel;
 
-	public RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world,
+	RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world,
 			JFrame frame) {
 		this.chart = chart;
 		this.world = world;
@@ -120,7 +123,7 @@ public class RefreshChart implements Runnable {
 	 *            the dataset that was created just before
 	 * @return the JFreeChart
 	 */
-	JFreeChart createChart(XYZDataset dataset, LookupPaintScale scale) {
+	private JFreeChart createChart(XYZDataset dataset, LookupPaintScale scale) {
 		NumberAxis xAxis = new NumberAxis();
 		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		xAxis.setLowerMargin(0.0);
@@ -145,10 +148,13 @@ public class RefreshChart implements Runnable {
 		plot.setRangeGridlinesVisible(false);
 		plot.setDomainMinorGridlinesVisible(false);
 		plot.setRangeMinorGridlinesVisible(false);
+		plot.setOutlineVisible(false);
 		// plot.setRangeGridlinePaint(Color.white);
 		JFreeChart chart = new JFreeChart(plot);
 		chart.removeLegend();
-		chart.setBackgroundPaint(Color.white);
+		chart.setBackgroundPaint(Color.BLACK);
+		chart.setPadding(new RectangleInsets(0, -8, -4, 0));
+		chart.setBorderVisible(false);
 		return chart;
 
 	}
@@ -159,7 +165,7 @@ public class RefreshChart implements Runnable {
 	 * @param chart
 	 *            the chart so set
 	 */
-	public void setChart(World world, JFreeChart chart) {
+	void setChart(World world, JFreeChart chart) {
 		this.chartPanel.setChart(chart);
 		this.world = world;
 	}

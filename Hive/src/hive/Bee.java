@@ -1,5 +1,6 @@
 package hive;
 
+
 import java.io.Serializable;
 import java.util.Random;
 //import java.util.LinkedList;
@@ -26,27 +27,23 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	private static final long serialVersionUID = -8026916698774991257L;
 	private int actualX;
 	private int actualY;
-	int age;
+	//private int age;
 	private boolean alive;
-	boolean atHome;
 	private Bee bee;
 	private Beehive beehive;
-	int food;
-	boolean hasKnowledge;
-	int homeX;
-	int homeY;
-	int knowledge;
-	Beehive ownHive;
-	Random rand;
-	Source source;
-	double sourceQual;
-	double sourceSize;
-	String sourceType;
-	int sourceX;
-	int sourceY;
+	private int food;
+	private int homeX;
+	private int homeY;
+	private Beehive ownHive;
+	private Random rand;
+	private Source source;
+	private double sourceQual;
+	private double sourceSize;
+	private String sourceType;
+	private int sourceX;
+	private int sourceY;
 	private String status;
-	ArrayList<Bee> waitingQueue;
-	World world;
+	private World world;
 
 	/**
 	 * Constructor method. Add to waiting queue, as bee is born in beehive and
@@ -62,9 +59,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 		this.homeY = ownHive.getPositionY();
 		this.actualX = ownHive.getPositionX();
 		this.actualY = ownHive.getPositionY();
-		this.atHome = true;
-		this.hasKnowledge = false;
-		this.age = 100;
+		//this.age = 100;
 		this.ownHive = ownHive;
 		this.status = "waiting";
 		this.world = world;
@@ -74,7 +69,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	}
 
 	@Override
-	public void addToQueue(Beehive beehive, Bee bee) {
+	public void addToQueue(Bee bee) {
 		// Add submitted bee to submitted beehive.waitingQueue
 
 		beehive.waitingQueueAdd(bee);
@@ -113,7 +108,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 				- distance / 6000;
 		// take the first 6 bees of the queue
 		// dance.queue.size() may be smaller than 6
-		ArrayList<Bee> danceQueue = this.removeFromQueue(beehive, count);
+		ArrayList<Bee> danceQueue = this.removeFromQueue(count);
 
 		ArrayList<Bee> removeQueue = new ArrayList<Bee>();
 		for (int k = 1; k < 100 * overallQuality; k++) {
@@ -142,7 +137,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 
 				// if there's no Bee in the waitingqueue, we will get a new
 				// ArrayList<Bee> with .size() == 0.
-				ArrayList<Bee> nextBee = removeFromQueue(b.ownHive, 1);
+				ArrayList<Bee> nextBee = removeFromQueue(1);
 				if (nextBee.size() > 0) {
 					danceQueue.add(nextBee.get(0));
 				}
@@ -292,7 +287,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 			// foundSource.y + ", x: " + this.actualX + ", y: " + this.actualY);
 			this.actualX = foundSource.x;
 			this.actualY = foundSource.y;
-			this.getStuff(foundSource, this);
+			this.getStuff(foundSource);
 		} else if (getStatus().equals("arrived")) {
 			setStatus("searching");
 		}
@@ -325,32 +320,28 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	}
 
 	@Override
-	public void getStuff(Source source, Bee bee) {
+	public void getStuff(Source source) {
 		// grab all the information and some food/water from source
 		// and reduce size of source by 1
-		this.bee = bee;
-		this.bee.source = source;
-		this.bee.food = this.source.getFood();
+		this.food = source.getFood();
 
 		// .. but if the source is empty, delete knowledge
-		if (this.bee.food == 0) {
-			this.bee.hasKnowledge = false;
-			this.bee.sourceX = 0;
-			this.bee.sourceY = 0;
-			this.bee.sourceQual = 0;
-			this.bee.sourceType = "";
-			this.bee.sourceSize = 0;
-			this.bee.setStatus("searching");
-			this.bee.removeKnow();
+		if (this.food == 0) {
+			this.sourceX = 0;
+			this.sourceY = 0;
+			this.sourceQual = 0;
+			this.sourceType = "";
+			this.sourceSize = 0;
+			this.setStatus("searching");
+			this.removeKnow();
 			// ... if the source is not empty, bee has food now.
 		} else {
-			this.bee.hasKnowledge = true;
-			this.bee.sourceX = this.source.x;
-			this.bee.sourceY = this.source.y;
-			this.bee.sourceQual = this.source.quality;
-			this.bee.sourceType = this.source.type;
-			this.bee.sourceSize = this.source.size;
-			this.bee.setStatus("full");
+			this.sourceX = source.x;
+			this.sourceY = source.y;
+			this.sourceQual = source.quality;
+			this.sourceType = source.type;
+			this.sourceSize = source.size;
+			this.setStatus("full");
 		}
 
 	}
@@ -367,16 +358,16 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	}
 
 	@Override
-	public void giveStuff(Beehive beehive, Bee bee) {
+	public void giveStuff(Beehive beehive) {
 		// +1 on food for submitted beehive, remove food from bee
 
-		synchronized (this.ownHive) {
+		synchronized (beehive) {
 			if (beehive.getFood() < beehive.getSize()) {
 				beehive.setFood(beehive.getFood() + 1);
-				bee.food = 0;
+				food = 0;
 			} else {
-				bee.setStatus("waiting");
-				this.bee.removeKnow();
+				this.setStatus("waiting");
+				this.removeKnow();
 			}
 		}
 	}
@@ -403,15 +394,15 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	}
 
 	@Override
-	public void removeFromQueue(Beehive beehive, Bee bee) {
+	public void removeFromQueue(Bee bee) {
 		// remove submitted Bee from submitted Beehive.waitingQueue
-		beehive.waitingQueueRemove(bee);
+		beehive.waitingQueueRemove(this);
 
 		refreshTableModel();
 	}
 
 	@Override
-	public ArrayList<Bee> removeFromQueue(Beehive beehive, int count) {
+	public ArrayList<Bee> removeFromQueue(int count) {
 		// this is mainly to get the first 6 bees of the waiting list for
 		// dancing lessons
 		ArrayList<Bee> beeSublist = new ArrayList<Bee>();
@@ -427,8 +418,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	/**
 	 * Removes any knowledge of sources.
 	 */
-	public void removeKnow() {
-		this.hasKnowledge = false;
+	private void removeKnow() {
 		this.sourceQual = 0;
 		this.sourceSize = 0;
 		this.sourceX = 0;
@@ -453,7 +443,6 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	 */
 	private void search() {
 		// TODO: better searching, only 3kms away from beehive
-		this.atHome = false;
 		setStatus("searching");
 
 		do {
@@ -520,7 +509,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 			}
 			switch (this.getStatus()) {
 			case "waiting":
-				removeFromQueue(ownHive, this);
+				removeFromQueue(this);
 				break;
 			}
 			this.alive = alive;
@@ -547,7 +536,6 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 	 * food.
 	 */
 	private void starting() {
-		this.atHome = false;
 		this.actualX = this.actualX + (rand.nextInt(6) - 3);
 		this.actualY = this.actualY + (rand.nextInt(6) - 3);
 		flight(this.sourceX, this.sourceY, "getFood");
@@ -596,8 +584,7 @@ public class Bee implements Runnable, SourceInterface, BeehiveInterface,
 				case "arrivedathome":
 					this.actualX = this.homeX;
 					this.actualY = this.homeY;
-					this.atHome = true;
-					this.giveStuff(this.beehive, this);
+					this.giveStuff(this.beehive);
 					if (this.getStatus() == "waiting") {
 						break;
 					} else {

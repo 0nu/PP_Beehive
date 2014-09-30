@@ -3,8 +3,6 @@ package hive;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.ArrayList;
-
 import javax.swing.table.DefaultTableModel;
 
 import sources.Source;
@@ -27,7 +25,6 @@ public class World implements Serializable {
 	private int numOfBees;
 	private int numOfThisBeehives;
 	private Random rand;
-	ArrayList<Integer> sourcesList;
 	private Source[][] sourcesMap;
 	private boolean startModel;
 	transient DefaultTableModel tableModelBeehives;
@@ -219,33 +216,6 @@ public class World implements Serializable {
 	}
 
 	/**
-	 * Helper function for getting random positions in world for sources and
-	 * beehive.
-	 * 
-	 * @param maxX
-	 *            in most times x-size of the world
-	 * @param maxY
-	 *            in most times y-size of the world
-	 * @param count
-	 *            number of xy-pairs to create
-	 * @param array
-	 *            not really needed, is it?
-	 * @return array of all xy-pairs
-	 */
-	//
-	ArrayList<Integer> getPosition(int maxX, int maxY, int count,
-			ArrayList<Integer> array) {
-		// TODO is array needed be submitted to this method?
-		Random rand = new Random();
-		array = new ArrayList<Integer>();
-		for (int j = 0; j < count + 1; j++) {
-			array.add(rand.nextInt(maxX));
-			array.add(rand.nextInt(maxY));
-		}
-		return array;
-	}
-
-	/**
 	 * @return the sourcesMap
 	 */
 	public Source[][] getSourcesMap() {
@@ -308,7 +278,7 @@ public class World implements Serializable {
 	 *            y-Value to look for
 	 * @return Source if there's one, null otherwise
 	 */
-	public Source hitSource(int x, int y) {
+	Source hitSource(int x, int y) {
 		return this.sourcesMap[x][y];
 	}
 
@@ -331,7 +301,7 @@ public class World implements Serializable {
 	 * @param source
 	 *            source to remove
 	 */
-	public void removeFromSourceMap(int x, int y, int size, Source source) {
+	private void removeFromSourceMap(int x, int y, int size, Source source) {
 		Integer radius = Integer.valueOf(Math.round(size / 1000));
 
 		int xCheck = 0;

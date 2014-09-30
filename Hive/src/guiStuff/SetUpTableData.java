@@ -11,7 +11,7 @@ import javax.swing.table.DefaultTableModel;
  * @author ole
  *
  */
-public class SetUpTableData implements Runnable {
+class SetUpTableData implements Runnable {
 	private World world;
 	private JTable jTable;
 	private String tableTyp;
@@ -24,7 +24,7 @@ public class SetUpTableData implements Runnable {
 	 * @param string
 	 *            "Beehives" or "Trees"
 	 */
-	public SetUpTableData(JTable jTable, World world, String string) {
+	SetUpTableData(JTable jTable, World world, String string) {
 		this.jTable = jTable;
 		this.world = world;
 		this.tableTyp = string;
@@ -38,7 +38,7 @@ public class SetUpTableData implements Runnable {
 	/**
 	 * This redraws the table completely.
 	 */
-	public void update() {
+	void update() {
 		DefaultTableModel tableModel = (DefaultTableModel) jTable.getModel();
 		tableModel.setRowCount(0);
 		switch (tableTyp) {

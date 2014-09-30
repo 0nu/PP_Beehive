@@ -3,7 +3,9 @@ package guiStuff;
 import hive.World;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
+import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -50,11 +52,11 @@ import org.jfree.data.xy.XYZDataset;
  */
 public class MyGui extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
-	World world;
+	private World world;
 	private JTable jTableTrees;
 	private JTable jTableBeehives;
-	SetUpTableData setUpTableDataTree;
-	SetUpTableData setUpTableDataBeehive;
+	private SetUpTableData setUpTableDataTree;
+	private SetUpTableData setUpTableDataBeehive;
 	private JSlider sliderBeeCount;
 	private JSpinner treeSpinner;
 	private JSlider sliderUpdateSpeed;
@@ -69,6 +71,7 @@ public class MyGui extends JPanel implements ActionListener {
 	private ChartPanel chartPanel;
 	private RefreshChart refresh;
 	private JButton stopBtn;
+	private JPanel control;
 
 	/**
 	 * Constructor. At the moment it creates 3 panels: - Table for sources -
@@ -115,7 +118,7 @@ public class MyGui extends JPanel implements ActionListener {
 		add(chartPanel);
 
 		// this is for the control stuff
-		JPanel control = new JPanel();
+		control = new JPanel();
 
 		// change hunger settings
 		JPanel panelSliderHunger = new JPanel();
@@ -263,6 +266,11 @@ public class MyGui extends JPanel implements ActionListener {
 		stopBtn = new JButton("Kill Threads");
 		stopBtn.setActionCommand("kill");
 		stopBtn.addActionListener(this);
+		
+		// this is for fullscreen mode
+		JButton fullscreenBtn = new JButton("Fullscreen");
+		fullscreenBtn.setActionCommand("fullscreen");
+		fullscreenBtn.addActionListener(this);
 
 		// add all the sliders and labels
 		control.add(panelSliderHunger);
@@ -274,20 +282,23 @@ public class MyGui extends JPanel implements ActionListener {
 		control.add(stopBtn);
 		control.add(saveGame);
 		control.add(loadGame);
-
+		control.add(fullscreenBtn);
 		add(control);
 
 		setLayout(new GridLayout(2, 2));
 		validate();
 		repaint();
 
+
+		
+		
 		refresh = new RefreshChart(chart, chartPanel, this.world, frame);
 		Thread ref = new Thread(refresh, "refresh");
 		ref.start();
 
 	}
 
-	static protected JSpinner addLabeledSpinner(Container c, String label,
+	static private JSpinner addLabeledSpinner(Container c, String label,
 			SpinnerModel model) {
 		JLabel l = new JLabel(label);
 		c.add(l);
@@ -307,7 +318,7 @@ public class MyGui extends JPanel implements ActionListener {
 	 * 
 	 * @return the chart
 	 */
-	JFreeChart createChart(XYZDataset dataset) {
+	private JFreeChart createChart(XYZDataset dataset) {
 		NumberAxis xAxis = new NumberAxis("X");
 		xAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		xAxis.setLowerMargin(0.0);
@@ -545,6 +556,15 @@ public class MyGui extends JPanel implements ActionListener {
 
 			source.setText("Kill Model");
 			source.setActionCommand("kill");
+		
+		case "fullscreen": 
+
+			
+			remove(control);
+			remove(treeScrollpane);
+			remove(beehiveScrollpane);
+			setLayout(new GridLayout(1, 1));
+			validate();
 		}
 	}
 
