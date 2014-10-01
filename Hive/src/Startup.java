@@ -49,8 +49,10 @@ public class Startup {
 				newContentPane.setOpaque(true); // content panes must be opaque
 				frame.setContentPane(newContentPane);
 				// Display the window.
+				frame.setExtendedState(frame.MAXIMIZED_BOTH);
 				frame.pack();
 				frame.setVisible(true);
+				
 				// MyGui myGui = new MyGui(myWorld,null);
 				// myGui.createAndShowGUI(myWorld);
 			}

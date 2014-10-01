@@ -5,12 +5,22 @@ import hive.World;
 import java.awt.Color;
 import java.awt.Insets;
 import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.event.ChartChangeEvent;
+import org.jfree.chart.event.ChartChangeListener;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
@@ -28,12 +38,13 @@ class RefreshChart implements Runnable {
 	private JFreeChart chart;
 	private World world;
 	private ChartPanel chartPanel;
+	private AtomicBoolean showPics;
 
-	RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world,
-			JFrame frame) {
+	RefreshChart(JFreeChart chart, ChartPanel chartPanel, World world, AtomicBoolean showPics) {
 		this.chart = chart;
 		this.world = world;
 		this.chartPanel = chartPanel;
+		this.showPics = showPics;
 	}
 
 	/**
@@ -108,12 +119,23 @@ class RefreshChart implements Runnable {
 					Thread.currentThread().interrupt();
 				}
 			}
-			this.chart = createChart(
-					new CreateXYBlockData(world).getDataset(width, height),
-					scale);
-			this.chartPanel.setChart(this.chart);
+			if (this.showPics.get()) {
+				
+						
+				
+			} else {
+			}
+				this.chart = createChart(
+						new CreateXYBlockData(world).getDataset(width, height,this.showPics.get()),
+						scale);
+				this.chartPanel.setChart(this.chart);
+		
 		}
 	}
+
+
+		
+
 
 	/**
 	 * Creates a new chart. Is run to set the new dataset to the xyblockrenderer
@@ -170,3 +192,4 @@ class RefreshChart implements Runnable {
 		this.world = world;
 	}
 }
+

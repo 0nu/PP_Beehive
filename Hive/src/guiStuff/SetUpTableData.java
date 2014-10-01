@@ -1,5 +1,7 @@
 package guiStuff;
 
+import java.awt.Dimension;
+
 import hive.World;
 
 import javax.swing.JTable;
@@ -59,6 +61,7 @@ class SetUpTableData implements Runnable {
 			}
 			world.setTableModel(tableModel, tableTyp);
 			jTable.setModel(tableModel);
+			
 
 			// tableModel.fireTableDataChanged();
 		}
@@ -82,6 +85,7 @@ class SetUpTableData implements Runnable {
 			}
 			world.setTableModel(tableModel, tableTyp);
 			jTable.setModel(tableModel);
+			
 			// tableModel.fireTableDataChanged();
 		}
 			break;
