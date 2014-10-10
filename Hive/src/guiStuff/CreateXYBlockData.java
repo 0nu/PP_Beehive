@@ -137,35 +137,43 @@ class CreateXYBlockData implements Runnable {
 			}
 		}
 
-		
-			Source[][] sourcesMap = this.world.getSourcesMap();
-			for (p = 0; p < width; p++) {
-				for (q = 0; q < height; q++) {
-					/*
-					 * if (densityData[j][k] != 0) { densityDataLL.add(new int[] {
-					 * p, k, densityData[p][k] }); }
-					 */
-					if ((densityData[q * width + p]) != 0) {
-						densityDataLL.add(new int[] { p, q,
-								densityData[q * width + p] });
-					}
-					if ( (!onlyBees) && (sourcesMap[p][q] != null)) {
-						densityDataSources
-						.add(new int[] {
-								p,
-								q,
-								Math.round(((sourcesMap[p][q].quality - 1) * 20 + (sourcesMap[p][q].size / 500))
-										* (-1)) });
-						// System.out.println("qual: " + sourcesMap[p][q].quality +
-						// ", size: " + sourcesMap[p][q].size + ", value: " +
-						// (((sourcesMap[p][q].quality -1 )*20 +
-						// (sourcesMap[p][q].size / 500)) * (-1)));
-					}
-
+		//TODO: synchronize sources map changes
+		int factor;
+		Source s;
+		Source[][] sourcesMap = this.world.getSourcesMap();
+		for (p = 0; p < width; p++) {
+			for (q = 0; q < height; q++) {
+				/*
+				 * if (densityData[j][k] != 0) { densityDataLL.add(new int[] {
+				 * p, k, densityData[p][k] }); }
+				 */
+				if ((densityData[q * width + p]) != 0) {
+					densityDataLL.add(new int[] { p, q,
+							densityData[q * width + p] });
 				}
-			}
+				if ( (!onlyBees) && (sourcesMap[p][q] != null)) {
+					s = sourcesMap[p][q];
+					
+					if (s.getType().equals("water")) {
+						factor = 200;
+					} else { 
+						factor = 0;
+					}
+					densityDataSources
+					.add(new int[] {
+							p,
+							q,
+							Math.round(((sourcesMap[p][q].getQuality() - 1) * 20 + (sourcesMap[p][q].getSize() / 500))
+									* (-1)) - factor });
+					// ", size: " + sourcesMap[p][q].size + ", value: " +
+					// (((sourcesMap[p][q].quality -1 )*20 +
+					// (sourcesMap[p][q].size / 500)) * (-1)));
+				}
 
-			if (!onlyBees) {
+			}
+		}
+
+		if (!onlyBees) {
 			for (Beehive b : this.world.getBeehives()) {
 				for (p = b.getPositionX() - 10; p < b.getPositionX() + 10; p++) {
 					for (q = b.getPositionY() - 10; q < b.getPositionY() + 10; q++) {
@@ -173,12 +181,12 @@ class CreateXYBlockData implements Runnable {
 						.add(new int[] {
 								p,
 								q,
-								((int) (b.getFood() / (b.getSize() + 1) * (-10)) * 20) });
+								((int) (b.getFood("tree") / (b.getSize() + 1) * (-10)) * 20) });
 					}
 				}
 			}
-	
-			
+
+
 		}
 
 		XYZDataset dataset = new XYZDataset() {

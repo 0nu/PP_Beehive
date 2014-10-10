@@ -27,7 +27,7 @@ public interface BeehiveInterface {
 	 * @param bee
 	 *            the bee that puts food into the beehive
 	 */
-	public void giveStuff(Beehive beehive);
+	public void giveStuff();
 	
 	/**
 	 * Remove a given number of bees from the waiting queue. -> beehvie

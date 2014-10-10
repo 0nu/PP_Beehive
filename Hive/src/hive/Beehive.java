@@ -15,7 +15,7 @@ import java.util.ArrayList;
 public class Beehive implements Runnable, Serializable, BeeInterface {
 
 	private static final long serialVersionUID = -5404284857273245055L;
-	private Boolean alive;
+	Boolean alive;
 	private double food;
 	int IndexInBeehiveList;
 	private String name;
@@ -24,6 +24,9 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 	private int size;
 	private ArrayList<Bee> waitingQueue;
 	World world;
+	private double water;
+	private boolean empty;
+	private double hunger;
 
 
 	/**
@@ -42,10 +45,11 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 		positionX = x;
 		positionY = y;
 		food = 1000;
+		water = 1000;
 		this.world = world;
 		this.waitingQueue = new ArrayList<Bee>();
 		this.size = (int) food;
-		food = 880;
+
 		this.name = "Beehive " + num;
 		this.alive = true;
 	}
@@ -55,39 +59,61 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 	 * 
 	 * @return empty == 1 if beehive is empty, otherweise empty == 0
 	 */
-	synchronized int eat() {
-		int empty;
-		if (this.food >= (this.world.getHunger() * this.getWaitingQueueSize())) {
-			this.food = this.food
-					- (this.world.getHunger() * this.getWaitingQueueSize());
-			empty = 0;
-
-			// change the tableModel for the gui
-			// but only change when the table is already created
-			// ... and rand = 10 <- this is ugly but saves some cpu time
-			// if (world.tableModelBeehives != null &&
-			// this.rand.nextInt(world.getUpdateSpeed() + 1) == 2) {// TODO:
-			// tableModelBeehives
-			// update
-			// more
-			// pretty
-			// &
-			// fast
-
-			world.tableModelBeehives.setValueAt(Double.toString(this.food),
-					this.IndexInBeehiveList, 1); // TODO:
-			// System.out.println(world + " " + world.tableModelBeehives);
+	boolean eat() {
+		empty = false;
+		this.hunger = this.world.getHunger();
+		if (this.food >= this.hunger) {
+			synchronized (this.alive) {
+				if (this.alive) {
+					takeFood();
+					world.setValue("beehive", this.food,this.IndexInBeehiveList,1);	
+				}
+			}
 		} else {
-			this.food = 0;
-			empty = 1;
-
+			empty = true;
 		}
+
+
+		if (this.water >= this.hunger){
+			synchronized (this.alive) {
+				if (this.alive) {
+					takeWater();
+					world.setValue("beehive", this.food, this.IndexInBeehiveList, 2);
+				}
+			}
+
+		} else {
+			empty = true;
+		}
+
+		// change the tableModel for the gui
+		// but only change when the table is already created
+		// ... and rand = 10 <- this is ugly but saves some cpu time
+		// if (world.tableModelBeehives != null &&
+		// this.rand.nextInt(world.getUpdateSpeed() + 1) == 2) {// TODO:
+		// tableModelBeehives
+		// update
+		// more
+		// pretty
+		// &
+		// fast
 
 		// I don't want negative food values
 		if (this.food < 0) {
 			this.food = 0;
 		}
+		if (this.water < 0) {
+			this.water = 0;
+		}
 		return empty;
+	}
+
+	synchronized private void takeWater() {
+		this.food = this.food - this.hunger;
+	}
+
+	synchronized private void takeFood() {
+		this.water = this.water - this.hunger;
 	}
 
 	/**
@@ -98,10 +124,18 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 	}
 
 	/**
+	 * @param sourceType 
 	 * @return the food
 	 */
-	public double getFood() {
-		return food;
+	public double getFood(String sourceType) {
+		double returnValue = 0;
+		if (sourceType.equals("water")) {
+			returnValue = water;
+		} else if (sourceType.equals("tree")) {
+			returnValue = food;
+		}
+		return returnValue;
+
 	}
 
 	/**
@@ -156,12 +190,13 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 	/**
 	 * Sets value in table model.
 	 */
-	private void refreshTableModel() {
-		if (this.world.tableModelBeehives != null) {
+	void refreshTableModel() {
+		if (this.world.getTableModel("beehive") != null) {
 			// the setValueAt method fires out a change event to the table ->
 			// table is refreshed in the gui -> new number is shown.
-			this.world.tableModelBeehives.setValueAt(
-					this.getWaitingQueueSize(), this.IndexInBeehiveList, 4);
+			//			this.world.tableModelBeehives.setValueAt(
+			//					this.getWaitingQueueSize(), this.IndexInBeehiveList, 5);
+			this.world.setValue("beehive", this.getWaitingQueueSize(), this.IndexInBeehiveList, 5);
 		}
 	}
 
@@ -177,16 +212,15 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 				}
 				// System.out.println(getWaitTime());
 				Thread.sleep((int) Math.round(900 * getWaitTime())); // 1000
-																		// milliseconds
-																		// is
-																		// one
-																		// second.
+				// milliseconds
+				// is
+				// one
+				// second.
 			} catch (InterruptedException ex) {
 				Thread.currentThread().interrupt();
 			}
 			synchronized (this.alive) {
 				if (this.alive) {
-					eat();
 					sendout();
 
 				}
@@ -213,7 +247,7 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 			synchronized (this.alive) {
 				this.world.Beehives.remove(this);
 				this.world
-						.setNumOfBeehives(this.world.getCountOfBeehives() - 1);
+				.setNumOfBeehives(this.world.getCountOfBeehives() - 1);
 			}
 			this.alive = alive;
 		}
@@ -228,11 +262,18 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 	}
 
 	/**
+	 * @param sourceType 
 	 * @param food
 	 *            the food to set
 	 */
-	public void setFood(double food) {
-		this.food = food;
+	public void setFood(String sourceType, double newValue) {
+		if (newValue < this.size) {
+			if (sourceType.equals("water")) {
+				this.water = newValue;
+			} else if (sourceType.equals("tree")) {
+				this.food = newValue;
+			}
+		}
 	}
 
 	/**
@@ -280,6 +321,7 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 		synchronized (waitingQueue) {
 			waitingQueue.add(beeToAdd);
 		}
+		refreshTableModel();
 
 	}
 
@@ -352,6 +394,28 @@ public class Beehive implements Runnable, Serializable, BeeInterface {
 		}
 
 		return beeSublist;
+	}
+
+	public double getRatio(String sourceType) {
+		// TODO Auto-generated method stub
+		double returnValue = 0;
+		if ((this.food <= 0) && (this.water <= 0)) {
+			returnValue = 1;
+		} else if (sourceType.equals("tree")) {
+			if (this.food <= 0) {
+				returnValue = 10;
+			} else {
+				returnValue = this.water / this.food;
+			}
+		} else if (sourceType.equals("water")) {
+			if (this.water <= 0) {
+				returnValue = 10;
+			} else {
+				returnValue = this.food / this.water;
+			}
+		}
+		//		System.out.println("Wanted: " + sourceType + ", " + returnValue + ", food: " + this.food + ", water: " + this.water);
+		return returnValue;
 	}
 
 }

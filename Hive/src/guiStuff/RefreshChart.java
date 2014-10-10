@@ -55,7 +55,7 @@ class RefreshChart implements Runnable {
 	public void run() {
 		// set up the paintscale for the xyblockrenderer
 
-		LookupPaintScale scale = new LookupPaintScale(-200, 50000, Color.orange);
+		LookupPaintScale scale = new LookupPaintScale(-400, 50000, Color.orange);
 
 		// these are the gradient colors for the beehive and the trees
 		// green -> high quality, red -> low quality
@@ -79,6 +79,24 @@ class RefreshChart implements Runnable {
 			}
 			red = red - 24;
 			green = green + 24;
+
+		}
+		
+//		similar method for the watersources. factor is (-200)
+		gradient = 0;
+		red = 255;
+		green = 0;
+		blue = 255;
+		int shifter = 200;
+		for (int i = 0; i < 10; i++) {
+			gradient = 0;
+			factor = i * 20;
+			gradient = gradient - factor;
+			for (j = -1; j >= -20; j--) {
+				scale.add(j - (i * 20) - shifter, new Color(red, green, blue, 12 * (-1)
+						* j + 15));
+			}
+			red = red - 24;
 
 		}
 

@@ -7,6 +7,7 @@ import javax.swing.table.DefaultTableModel;
 
 import sources.Source;
 import sources.Tree;
+import sources.Water;
 
 /**
  * 
@@ -27,12 +28,14 @@ public class World implements Serializable {
 	private Random rand;
 	private Source[][] sourcesMap;
 	private boolean startModel;
-	transient DefaultTableModel tableModelBeehives;
+	private transient DefaultTableModel tableModelBeehives;
 	private transient DefaultTableModel tableModelTrees;
-	public LinkedList<Tree> trees;
+	public LinkedList<Source> trees;
 	private int updateSpeed;
 	private int width;
 	private int worldSpeed;
+	private LinkedList<Source> waters;
+	private transient DefaultTableModel tableModelWaters;
 
 	/**
 	 * Creates the world.
@@ -50,7 +53,7 @@ public class World implements Serializable {
 	 * @param hungry
 	 */
 	public World(int width, int height, int numOfBees, int numOfBeehives,
-			int numOfSources, int numOfTrees, double hungry) {
+			double hungry) {
 		startModel = false;
 		this.setWidth(width);
 		this.setHeight(height);
@@ -64,6 +67,8 @@ public class World implements Serializable {
 		updateSpeed = 100;
 		worldSpeed = 80;
 		this.numOfBees = numOfBees;
+		trees = new LinkedList<Source>();
+		waters = new LinkedList<Source>();
 	}
 
 	/**
@@ -90,15 +95,15 @@ public class World implements Serializable {
 	 * @param source
 	 *            which Source to add
 	 */
-	public void addToSourceMap(int x, int y, int size, Source source) {
-		Integer radius = Integer.valueOf(Math.round(size / 1000));
+	public void addToSourceMap(Source source) {
+		Integer radius = Integer.valueOf(Math.round(source.getSize() / 1000));
 
 		int xCheck = 0;
 		int yCheck = 0;
 		for (int yIter = -radius; yIter <= radius; yIter++) {
 			for (int xIter = -radius; xIter <= radius; xIter++) {
-				xCheck = xIter + x;
-				yCheck = yIter + y;
+				xCheck = xIter + source.getX();
+				yCheck = yIter + source.getY();
 				if (((xIter * xIter) + (yIter * yIter) <= (radius * radius))
 						&& (xCheck < this.getWidth())
 						&& (yCheck < this.getHeight()) && (xCheck > 0)
@@ -144,23 +149,33 @@ public class World implements Serializable {
 	 * 
 	 * @param numOfSources
 	 *            how many sources to create
+	 * @return 
 	 * @return List of all sources in this world
 	 */
 	// this is for creating all the different sources
-	public LinkedList<Tree> createSources(int numOfSources) {
+	public void createSources(int numOfSource, String type) {
 
 		// create sourcesList with the X and Y positions for the later created
 		// sources and beehives
-		trees = new LinkedList<Tree>();
 
 		// now create trees with the positions saved in _scourcesList_
-		for (int i = 1; i <= numOfSources; i++) {
+		if (type.equals("Trees")) {
+			for (int i = 1; i <= numOfSource; i++) {
 
-			trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
-			trees.getLast().setName("Tree " + i);
-			trees.getLast().setPositionInTrees(trees.size() - 1);
+				trees.add(new Tree(rand.nextInt(width), rand.nextInt(height), this));
+				trees.getLast().setName("Tree " + i);
+				trees.getLast().setPosition(trees.size() - 1);
+			}
+		} else if (type.equals("Waters")) {
+			for (int i = 1; i <= numOfSource; i++) {
+
+				waters.add(new Water(rand.nextInt(width), rand.nextInt(height), this));
+				waters.getLast().setName("Water " + i);
+				waters.getLast().setPosition(waters.size() - 1);
+			}
+
 		}
-		return trees;
+		//return trees;
 	}
 
 	/**
@@ -225,8 +240,16 @@ public class World implements Serializable {
 	/**
 	 * @return the tableModelTrees
 	 */
-	public DefaultTableModel getTableModelTrees() {
-		return tableModelTrees;
+	public DefaultTableModel getTableModel(String type) {
+		if (type.equals("tree")) {
+			return tableModelTrees;
+		} else if (type.equals("water")) {
+			return tableModelWaters;
+		} else if (type.equals("beehive")) {
+			return tableModelBeehives;
+		}
+		return null;
+		
 	}
 
 	/**
@@ -240,7 +263,7 @@ public class World implements Serializable {
 	/**
 	 * @return LinkedList of trees of this world
 	 */
-	public LinkedList<Tree> getTrees() {
+	public LinkedList<Source> getTrees() {
 		// TODO Auto-generated method stub
 		return trees;
 	}
@@ -416,6 +439,9 @@ public class World implements Serializable {
 		case "Trees":
 			this.tableModelTrees = tableModel;
 			break;
+		case "Waters":
+			this.tableModelWaters = tableModel;
+			break;
 		}
 	}
 
@@ -423,35 +449,39 @@ public class World implements Serializable {
 	 * @param tableModelTrees
 	 *            the tableModelTrees to set
 	 */
-	public void setTableModelTrees(DefaultTableModel tableModelTrees) {
-		this.tableModelTrees = tableModelTrees;
-	}
+	//public void setTableModelTrees(DefaultTableModel tableModelTrees) {
+	//	this.tableModelTrees = tableModelTrees;
+	//}
 
 	/**
 	 * @param newCount
 	 *            the new tree count to set
 	 */
-	public void setTreeCount(int newCount) {
-		// This changes number of Trees
-		int diff = newCount - this.trees.size();
+	public void setSourceCount(int newCount, String type) {
+		// This changes number of Sources
+		Source newSource = null;
+		LinkedList<Source> list = null;
+		String sourceString = null;
+		if (type.equals("Trees")) {
+			list = trees;
+		} else if (type.equals("Waters")) {
+			list = waters;
+		}
+		int diff = newCount - list.size();
 		if (diff > 0) {
 			for (int i = 0; i < diff; i++) {
-				trees.add(new Tree(rand.nextInt(width), rand.nextInt(height),
-						this));
-				int size = this.trees.size();
-				trees.getLast().setName("Tree " + (size));
-
-				Thread t = new Thread(trees.getLast(), "Tree " + (size));
+				createSources(1, type);
+				Thread t = new Thread(list.getLast(), type + (list.size()));
 				t.start();
-				trees.getLast().setPositionInTrees(size - 1);
+				list.getLast().setPosition(list.size() - 1);
 			}
 
 		} else if (diff < 0) {
 			for (int i = 0; i > diff; i--) {
-				Tree t = trees.getLast();
-				this.removeFromSourceMap(t.x, t.y, t.maxsize, t);
+				Source t = list.getLast();
+				this.removeFromSourceMap(t.getX(), t.getY(), t.getMaxsize(), t);
 				t.setAlive(false);
-				trees.removeLast();
+				list.removeLast();
 			}
 		}
 	}
@@ -525,7 +555,15 @@ public class World implements Serializable {
 			trees.get(i).setAlive(true);
 			trees.get(i).setName("Tree " + i);
 			t.start();
-			trees.getLast().setPositionInTrees(i + 1);
+			trees.getLast().setPosition(i + 1);
+		}
+
+		for (int i = 0; i < this.waters.size(); i++) {
+			Thread t = new Thread(waters.get(i), "Water " + i + 1);
+			waters.get(i).setAlive(true);
+			waters.get(i).setName("Water " + i);
+			t.start();
+			waters.getLast().setPosition(i + 1);
 		}
 	}
 
@@ -537,5 +575,40 @@ public class World implements Serializable {
 		startModel = false;
 
 	}
+
+	public Number getWaterCount() {
+		// TODO Auto-generated method stub
+		return this.waters.size();
+	}
+
+	public LinkedList<Source> getWaters() {
+		// TODO Auto-generated method stub
+		return waters;
+	}
+
+	/**
+	 * Removes bee from bee-list.
+	 * @param bee the bee to remove
+	 */
+	public void removeBee(Bee bee) {
+		this.bees.remove(bee);
+	}
+
+	/**
+	 * Setter for table cell.
+	 * @param tableName which table
+	 * @param newValue new value
+	 * @param rowNumber row number
+	 * @param columnNumber column number
+	 */
+	public void setValue(String tableName, double newValue, int rowNumber,
+			int columnNumber) {
+		if ((tableName.equals("beehive")) && (this.tableModelBeehives != null )) {
+		this.tableModelBeehives.setValueAt(Double.toString(newValue),
+				rowNumber, columnNumber);
+			}
+	}
+
+
 
 }

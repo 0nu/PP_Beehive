@@ -16,18 +16,20 @@ public class Startup {
 	static int worldY;
 	static int numOfSources;
 	static int numOfTrees;
+	private static int numOfWaters;
 	public static void main(String[] args) {
 		hungry = 0.001; // How much food does each bee take at a time
-		numOfBees = 205;
+		numOfBees = 2050;
 		numOfBeehives = 1;
 		worldX = 1000;
 		worldY = 600;
-		numOfSources = 50;
-		numOfTrees = 5; // TODO: this as command line input.
+		numOfTrees = 25; // TODO: this as command line input.
+		numOfWaters = 25;
 		// this will create the world
 		final World myWorld = new World(worldX, worldY, numOfBees,
-				numOfBeehives, numOfSources, numOfTrees, hungry);
-		myWorld.createSources(numOfTrees);
+				numOfBeehives, hungry);
+		myWorld.createSources(numOfTrees, "Trees");
+		myWorld.createSources(numOfWaters, "Waters");
 		// create the beehives and bees
 		for (int i = 0; i < numOfBeehives; i++) {
 			// the beehive gets the number of bees to create in it, the number

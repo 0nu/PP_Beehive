@@ -61,6 +61,7 @@ import org.jfree.chart.renderer.LookupPaintScale;
 import org.jfree.chart.renderer.xy.XYBlockRenderer;
 import org.jfree.data.xy.XYZDataset;
 
+import sources.Source;
 import sources.Tree;
 
 import java.awt.BorderLayout;
@@ -100,6 +101,13 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 	private JCheckBox checkBoxShowPics;
 	private AtomicBoolean showPics;
 	private JPanel tablePanel;
+	private JSpinner waterSpinner;
+	private SetUpTableData setUpTableDataWater;
+	private JScrollPane waterScrollpane;
+	private JTable treeTable;
+	private JTable waterTable;
+	private String[] sourceColName;
+	String[] beehiveColName;
 
 	/**
 	 * Constructor. At the moment it creates 3 panels: - Table for sources -
@@ -115,10 +123,11 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 		showPics = new AtomicBoolean(false);
 		this.world = world;
 		setLayout(new BorderLayout(0, 0));
+
 		// this is the Tree table
-		String[] treeColName = { "Name", "Size", "Max Size", "Quality",
+		sourceColName = new String[]{ "Name", "Size", "Max Size", "Quality",
 				"Refresh", "Type", "X", "Y" };
-		JTable treeTable = getJTable(treeColName, jTableTrees);
+		treeTable = getJTable(sourceColName, treeTable);
 		setUpTableDataTree = new SetUpTableData(treeTable, world, "Trees");
 
 		treeScrollpane = new JScrollPane();
@@ -127,9 +136,20 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 		//add(treeScrollpane, BorderLayout.SOUTH);
 		setUpTableDataTree.update();
 
+		// this is the Water table
+		waterTable = getJTable(sourceColName, waterTable);
+		setUpTableDataWater = new SetUpTableData(waterTable, world, "Waters");
+
+		waterScrollpane = new JScrollPane();
+		waterScrollpane.setViewportView(waterTable);
+		waterScrollpane.setPreferredSize(new Dimension(500,100));
+		//add(treeScrollpane, BorderLayout.SOUTH);
+		setUpTableDataWater.update();
+
+
 		// this is the beehive table
-		String[] BeehiveColName1 = { "Name", "Size", "X", "Y", "Waiting Bees" };
-		JTable beehiveTable = getJTable(BeehiveColName1, jTableBeehives);
+		beehiveColName = new String[]{"Name", "Food", "Water", "X", "Y", "Waiting Bees" };
+		JTable beehiveTable = getJTable(beehiveColName, jTableBeehives);
 		setUpTableDataBeehive = new SetUpTableData(beehiveTable, world,
 				"Beehives");
 		beehiveScrollpane = new JScrollPane();
@@ -141,6 +161,7 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 		tablePanel = new JPanel();
 		tablePanel.add(beehiveScrollpane);
 		tablePanel.add(treeScrollpane);
+		tablePanel.add(waterScrollpane);
 		add(tablePanel,BorderLayout.SOUTH);
 		// this could create the xyblockrenderer stuff
 		// CreateXYBlockData blockData = new CreateXYBlockData(world);
@@ -298,21 +319,48 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				JSpinner source = (JSpinner) e.getSource();
-				MyGui.this.world.setTreeCount((int) source.getValue());
+				MyGui.this.world.setSourceCount((int) source.getValue(), "Trees");
 				setUpTableDataTree.update();
 				if (showPics.get()) {
 					setPics();
 				}
 			}
 		});
+
+		SpinnerModel water = new SpinnerNumberModel(
+				MyGui.this.world.getWaterCount(), // initial value
+				0, // min
+				100, // max
+				1); // step
+		waterSpinner = new JSpinner(water);
+		waterSpinner.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JSpinner source = (JSpinner) e.getSource();
+				MyGui.this.world.setSourceCount((int) source.getValue(),"Waters");
+				setUpTableDataWater.update();
+				if (showPics.get()) {
+					setPics();
+				}
+			}
+		});
+
 		JPanel panelTreeSpinner = new JPanel();
 		JLabel labelTreeSpinner = new JLabel("Anzahl der Bäume");
+		JPanel panelWaterSpinner = new JPanel();
+		JLabel labelWaterSpinner = new JLabel("Anzahl Wasserquellen");
 
 		// add all the sliders and labels
 		control.add(panelTreeSpinner);
+		control.add(panelWaterSpinner);
+
 		panelTreeSpinner.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		panelTreeSpinner.add(labelTreeSpinner);
 		panelTreeSpinner.add(treeSpinner);
+		panelWaterSpinner.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		panelWaterSpinner.add(labelWaterSpinner);
+		panelWaterSpinner.add(waterSpinner);
+
 		control.add(panelSliderHunger);
 		control.add(panelSliderBeehiveSize);
 		control.add(panelSliderUpdateSpeed);
@@ -320,7 +368,6 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 		control.add(panelSliderBeeCount);
 		control.setLayout(new BoxLayout(control, BoxLayout.PAGE_AXIS));
 		add(control, BorderLayout.EAST);
-
 
 		// This is the button to start the odel
 		startBtn = new JButton("Start Model");
@@ -476,12 +523,10 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 				this.chartPanel.removeAll();
 			}
 
-
-			
-		}else {
+		} else {
 
 			// TODO Auto-generated method stub
-			boolean startagain = false;
+			boolean startAgain = false;
 			JButton source = (JButton) e.getSource();
 			switch (source.getActionCommand()) {
 			case "start":
@@ -504,7 +549,7 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 				// Dialog zum Speichern von Dateien anzeigen
 				if (this.world.isStartModel()) {
 					this.world.stopModel();
-					startagain = true;
+					startAgain = true;
 				}
 				JFileChooser chooser = new JFileChooser();
 				chooser.setSelectedFile(new File("data.dat"));
@@ -521,16 +566,20 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 						JOptionPane.showMessageDialog(null, e1.getMessage(),
 								"Error", JOptionPane.ERROR_MESSAGE);
 					}
-					if (startagain) {
+					if (startAgain) {
 						this.world.startModel();
-						startagain = false;
+						startAgain = false;
 					}
+				} else if (startAgain) {
+					this.world.startModel();
+					startAgain = false;
 				}
 				break;
 
 			case "load":
 				if (this.world.isStartModel()) {
 					this.world.stopModel();
+					startAgain = true;
 				}
 				JFileChooser chooser2 = new JFileChooser();
 				chooser2.setSelectedFile(new File("data.dat"));
@@ -554,7 +603,8 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 					}
 
 					if (!failure) {
-						MyGui.this.world.setTreeCount(0);
+						MyGui.this.world.setSourceCount(0,"Trees");
+						MyGui.this.world.setSourceCount(0, "Trees");
 						MyGui.this.world.setBeeCount(0);
 						setUpTableDataTree.update();
 						if (MyGui.this.world.getBeehives().size() != 0) {
@@ -564,9 +614,7 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 						setUpTableDataBeehive.update();
 						world = world_new;
 						// change beehive table to actual one
-						String[] BeehiveColName1 = { "Name", "Size", "X", "Y",
-						"Waiting Bees" };
-						JTable beehiveTable = getJTable(BeehiveColName1,
+						JTable beehiveTable = getJTable(beehiveColName,
 								jTableBeehives);
 						setUpTableDataBeehive = new SetUpTableData(beehiveTable,
 								world, "Beehives");
@@ -574,25 +622,30 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 						setUpTableDataBeehive.update();
 
 						// this is the Tree table
-						String[] treeColName = { "Name", "Size", "Max Size",
-								"Quality", "Refresh", "Type", "X", "Y" };
-						JTable treeTable = getJTable(treeColName, jTableTrees);
+						treeTable = getJTable(sourceColName, treeTable);
 						setUpTableDataTree = new SetUpTableData(treeTable, world,
 								"Trees");
-						// JScrollPane treeScrollpane = new JScrollPane();
 						treeScrollpane.setViewportView(treeTable);
-						// add(treeScrollpane);
 
+						// this is the Water table
+						waterTable = getJTable(sourceColName, waterTable);
+						setUpTableDataWater = new SetUpTableData(waterTable, world, "Waters");
+						waterScrollpane.setViewportView(waterTable);
+						
+//						this is the visualisation panel
 						chart = createChart(new CreateXYBlockData(this.world)
 						.createDataset(this.world.getWidth(),
 								this.world.getHeight(), showPics.get()));
 						chartPanel.setChart(chart);
 						refresh.setChart(world, chart);
+						
+						
 
 						this.world.startBeehives();
 						this.world.startSources();
 						this.world.startBees();
 						setUpTableDataTree.update();
+						setUpTableDataWater.update();
 						sliderBeeCount.setEnabled(true);
 						sliderBeeCount.setValue(this.world.getBeeCount());
 						sliderBeehiveSize.setEnabled(true);
@@ -606,19 +659,26 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 						sliderWorldSpeed.setValue(this.world.getWorldSpeed());
 						treeSpinner.setEnabled(true);
 						treeSpinner.setValue(this.world.getTreeCount());
+						waterSpinner.setEnabled(true);
+						waterSpinner.setValue(this.world.getWaterCount());
 						stopBtn.setText("Kill Model");
 						stopBtn.setActionCommand("kill");
 						startBtn.setEnabled(true);
 					}
+				} else if (startAgain) {
+					this.world.startModel();
+					startAgain = false;
 				}
 				break;
 
 			case "kill":
 				this.world.stopModel();
 
-				MyGui.this.world.setTreeCount(0);
+				MyGui.this.world.setSourceCount(0,"Trees");
+				MyGui.this.world.setSourceCount(0,"Waters");
 				MyGui.this.world.setBeeCount(0);
 				setUpTableDataTree.update();
+				setUpTableDataWater.update();
 
 				if (MyGui.this.world.getBeehives() != null) {
 					MyGui.this.world.getBeehives().getFirst().setAlive(false);
@@ -632,6 +692,7 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 				sliderWorldSpeed.setEnabled(false);
 
 				treeSpinner.setEnabled(false);
+				waterSpinner.setEnabled(false);
 
 				startBtn.setEnabled(false);
 				startBtn.setText("Start Model");
@@ -645,10 +706,12 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 			case "init":
 				this.world.createBeehive(1);
 				this.world.setNumOfBeehives(1);
-				this.world.createSources((int) treeSpinner.getValue());
+				this.world.createSources((int) treeSpinner.getValue(),"Trees");
+				this.world.createSources((int) waterSpinner.getValue(),"Waters");
 				this.world.createBees(sliderBeeCount.getValue());
 				setUpTableDataBeehive.update();
 				setUpTableDataTree.update();
+				setUpTableDataWater.update();
 
 				this.world.startBeehives();
 				this.world.startSources();
@@ -661,6 +724,7 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 				sliderWorldSpeed.setEnabled(true);
 
 				treeSpinner.setEnabled(true);
+				waterSpinner.setEnabled(true);
 
 				startBtn.setEnabled(true);
 				saveGame.setEnabled(true);
@@ -681,25 +745,22 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 			case "saveImage":
 				if (this.world.isStartModel()) {
 					this.world.stopModel();
-					startagain = false;
+					startAgain = true;
 				}
 				JFileChooser chooser3 = new JFileChooser();
 				chooser3.setSelectedFile(new File("data.png"));
 				int buttonPressed3 = chooser3.showSaveDialog(this);
 				if (buttonPressed3 == JFileChooser.APPROVE_OPTION) {
-
 					try {
 						ChartUtilities.writeChartAsPNG(new FileOutputStream(chooser3.getSelectedFile()), chartPanel.getChart(), this.world.getWidth(), this.world.getHeight());
 					} catch (IOException e1) {
 						System.out.println("Error " + e1);
 						e1.printStackTrace();
 					}
-
 				}
-				if (startagain) {
+				if (startAgain) {
 					this.world.startModel();
-					startagain = false;
-
+					startAgain = false;
 				}
 				break;
 
@@ -722,10 +783,12 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 			Dimension size = this.chartPanel.getSize();
 			BufferedImage picBeehive =null;
 			BufferedImage picTree = null;
+			BufferedImage picWater = null;
 			//		load the pics for beehive and tree
 			try {
 				picBeehive = ImageIO.read(this.getClass().getResource("beehive.png"));
 				picTree = ImageIO.read(this.getClass().getResource("tree.png"));
+				picWater  = ImageIO.read(this.getClass().getResource("water.png"));
 
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -733,33 +796,47 @@ public class MyGui extends JPanel implements ActionListener, MouseListener {
 			JLabel icon= new JLabel(new ImageIcon(picBeehive));
 			this.chartPanel.add(icon);
 
-
+//			set sizes and position depending on window size
 			Dimension sizeIcon = icon.getPreferredSize();
 			double factorX = size.width / (double)world.getWidth();
 			double factorY = (size.height / (double)world.getHeight());
 
+			
 			int xStart = (int)(world.getBeehives().getFirst().getPositionX() * factorX);
 			int yStart = size.height - (int)(world.getBeehives().getFirst().getPositionY() * factorY);
 			xStart = xStart - (sizeIcon.width /2);
 			yStart = yStart - (sizeIcon.height / 2);
-			int xEnd = xStart + sizeIcon.width;
-			int yEnd = yStart + sizeIcon.height;
 			icon.setBounds(xStart, yStart, sizeIcon.width, sizeIcon.height);
 
+//			for every tree, show icon
 			LinkedList<JLabel> treePics = new LinkedList<>();
-
-			for (Tree t: world.trees) {
+			for (Source t: world.getTrees()) {
 				JLabel icon1 = (new JLabel(new ImageIcon(picTree)));
 				treePics.add(icon1);
 				this.chartPanel.add(icon1);
 				sizeIcon = icon1.getPreferredSize();
 
-				xStart = (int) (t.x * factorX);
+				xStart = (int) (t.getX() * factorX);
 				xStart = xStart - (sizeIcon.width / 2);
-				yStart = (int) (t.y * factorY);
+				yStart = (int) (t.getY() * factorY);
 				yStart = size.height - yStart - (sizeIcon.height / 2);
 				icon1.setBounds(xStart, yStart,sizeIcon.width,sizeIcon.height);
 			}
+			
+//			for every watersource, show icon
+			for (Source t: world.getWaters()) {
+				JLabel icon1 = (new JLabel(new ImageIcon(picWater)));
+				treePics.add(icon1);
+				this.chartPanel.add(icon1);
+				sizeIcon = icon1.getPreferredSize();
+
+				xStart = (int) (t.getX() * factorX);
+				xStart = xStart - (sizeIcon.width / 2);
+				yStart = (int) (t.getY() * factorY);
+				yStart = size.height - yStart - (sizeIcon.height / 2);
+				icon1.setBounds(xStart, yStart,sizeIcon.width,sizeIcon.height);
+			}			
+
 		}
 
 	}

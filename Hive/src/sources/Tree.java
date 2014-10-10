@@ -13,8 +13,6 @@ import java.util.Random;
 public class Tree extends Source implements Serializable {
 
 	private static final long serialVersionUID = -2921153093843445284L;
-	private World world;
-
 
 	/**
 	 * @param x x-value
@@ -23,22 +21,17 @@ public class Tree extends Source implements Serializable {
 	 */
 	public Tree(int x, int y, World world) {
 		this.rand = new Random();
-		this.x = x;
-		this.y = y;
+		this.setX(x);
+		this.setY(y);
 		this.world = world;
-		this.quality = this.rand.nextInt(9) + 1;
-		this.size = this.rand.nextInt(10000);
-		maxsize = this.size;
-		this.recovery = this.rand.nextInt(100) + 1;
+		this.setQuality(this.rand.nextInt(9) + 1);
+		this.setSize(this.rand.nextInt(10000));
+		setMaxsize(this.getSize());
+		this.setRecovery(this.rand.nextInt(100) + 1);
 		setAlive(true);
-		this.rand = new Random();
+		this.world = world;
+		setType("tree");
 	}
 
-	@Override
-	public void run() {
-		addToSourceMap(world);
-		grow(world);
-
-	}
-
+	
 }
